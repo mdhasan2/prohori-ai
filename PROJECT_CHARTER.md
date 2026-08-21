@@ -101,13 +101,36 @@ The MVP will:
 
 ## Non-goals
 
+Prohori AI is not:
+
+- A production penetration-testing platform
+- A vulnerability scanner replacement
+- A general-purpose autonomous hacking agent
+- A system for testing third-party targets
+- A malware, persistence, evasion, credential-theft, or phishing platform
+- A mechanism for granting a model direct shell access
+- A system that allows agents to approve their own actions
+- A benchmark claiming broad offensive-security coverage
+- A self-modifying or self-deploying agent
+- A system for automatically learning executable behavior from tool output
+
 ## Safety boundary
 
-## MVP boundary
+### Authorized targets
 
-## Non-goals
+### Network boundary
 
-## Safety boundary
+### Capability boundary
+
+### Execution boundary
+
+### Trust boundary
+
+### Approval boundary
+
+### Operational limits
+
+### Audit boundary
 
 ## Success criteria
 
