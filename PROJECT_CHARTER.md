@@ -43,3 +43,45 @@ This project domonstrates applied learning and engineering capability. It does n
 ## System lifecycle
 
 Observe -> Discover -> Validate -> Prioritize -> Remediate -> Verify -> Learn
+
+## MVP statement
+
+The MVP will run one complete investigation against one intentionally vulnerable FastAPI service running as a project-owned Docker service.
+
+The MVP will:
+
+1. Load an explicitly allowlisted local asset.
+2. Collect passive evidence.
+3. Form a deterministic or structured security hypothesis.
+4. Propose a controlled active validation action.
+5. Pause for explicit human approval.
+6. Execute only an approved, typed validation capability.
+7. Produce an evidence-backed finding and risk assessment.
+8. Propose one minimal remediation with risk and rollback information.
+9. Pause for a second explicit human approval.
+10. Apply the remediation only inside the disposable lab.
+11. Verify whether the original vulnerability remains.
+12. Record correlated, append-only audit events for every material decision.
+13. Stop safely on denial, policy failure, tool failure, budget exhaustion, timeout, or emergency-stop activation.
+14. Resume an interrupted investigation from a durable checkpoint.
+
+## MVP boundary
+
+### Included
+
+- Python 3.12 or later
+- FastAPI control API and vulnerable lab service
+- Typed domain models and validated tool arguments
+- One deterministic local vulnerability scenario
+- Supervisor, Red, Blue, and Green responsibilities
+- Default-deny scope an capability policy
+- Human approval for active validation and modification
+- MCP-based asset context and security-testing integrations
+- LangGraph orchestration after deterministic workflow validation
+- OpenAI Responses API integration after deterministic tests pass
+- PostgreSQL-backed investigation and audit data
+- Structured logging, traces, metrics, and a minimal dashboard
+- Safety, functional, integration, and evaluation tests
+- A minimal CLI or approval interface
+
+### Deferred until after the MVP
