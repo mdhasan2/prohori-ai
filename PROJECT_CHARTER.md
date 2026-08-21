@@ -85,3 +85,53 @@ The MVP will:
 - A minimal CLI or approval interface
 
 ### Deferred until after the MVP
+
+- Kubernetes targets
+- Cloud accounts and IAM attack paths
+- Public or externally hosted targets
+- Host-network scanning
+- Multiple scanners
+- General-purpose browser automation
+- Arbitrary shell or code execution
+- Autonomous remediation outside the lab
+- Multiple agent frameworks
+- Multi-model routing
+- Attack-path graph databases
+- Continuous unattended operation
+
+## Non-goals
+
+## Safety boundary
+
+## MVP boundary
+
+## Non-goals
+
+## Safety boundary
+
+## Success criteria
+
+## Quality targets
+
+## Major learning objectives
+
+## Stakeholders
+
+## Principal risks
+
+| Risk | Initial mitigation |
+|---|---|
+| Scope escape | Exact allowlists and execution-time revalidation |
+| Approval bypass | Durable action-bound approvals and negative tests |
+| Prompt injection | Untrusted-content isolation and deterministic policy |
+| Arbitrary execution | Registered typed tools only; no shell capability |
+| Duplicate risky action after resume | Idempotency keys and execution records |
+| False-positive finding | Independent Blue review and evidence requirements |
+| Unsafe remediation | Disposable lab, minimal changes, approval, rollback |
+| Audit tampering | Append-only event design |
+| Cost or retry loop | Time, request, retry, token, and cost budgets |
+| Framework coupling | Infrastructure adapters around an independent domain |
+
+## Development roadmap
+
+## Definition of done
