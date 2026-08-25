@@ -1,0 +1,36 @@
+[project]
+name = "prohori-ai"
+version = "0.1.0"
+description = "A human-governed, closed-loop offensive security agent system"
+readme = "README.md"
+authors = [
+    { name = "Md Hasan", email = "jakirul@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "pydantic-settings>=2.15.0",
+]
+
+[project.scripts]
+prohori-ai = "prohori_ai:main"
+
+[build-system]
+requires = ["uv_build>=0.12.5,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "mypy>=2.3.1",
+    "pre-commit>=4.6.2",
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.16.4",
+]
+
+[tool.ruff]
+line-length = 100
+target-version ="py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+
