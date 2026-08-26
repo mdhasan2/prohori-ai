@@ -9,6 +9,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 EnvironmentName = Literal["development", "test", "production"]
 LogLevel = Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 
+
 class Settings(BaseSettings):
     """Configuration loaded from environment variables or a local .env file."""
 
@@ -24,6 +25,7 @@ class Settings(BaseSettings):
     require_human_approval: bool = True
     log_level: LogLevel = "INFO"
     project_name: str = Field(default="ProhoriAI", min_length=1)
+
 
 @lru_cache
 def get_settings() -> Settings:

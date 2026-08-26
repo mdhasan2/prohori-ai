@@ -38,13 +38,49 @@ select = [
     "W",    # pycodestyle warnings
     "I",    # Import sorting
     "B",    # Bugbear
+    "UP",   # Python syntax upgrades
+    "N",    # Naming conentions
+    "S",    # Common security issues
+    "ANN",  # Type annotations
+    "RUF",  # Ruff-specific rules
 ]
+
+ignore = [
+    "S101", # Permit assert statement in tests
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+docstring-code-format = true
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+pretty = true
+show_error_codes = true
+show_error_code_links = true
+warn_unreachable = true
+mypy_path = "src"
+packages = ["prohori_ai"]
 
 [tool.uv.build-backend]
 module-name = "prohori_ai"
 module-root = "src"
 
 [tool.pytest.ini_options]
+minversion = "8.0"
 pythonpath = ["src"]
 testpaths = ["tests"]
+addopts = [
+    "--strict-config",
+    "--strict-markers",
+    "--cov=prohori_ai",
+    "--cov-report=term-missing",
+    "--cov-fail-under=80",
+]
+markers = [
+    "integration: tests involving multiple components or external boundaries",
+]
 
