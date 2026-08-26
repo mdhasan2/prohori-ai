@@ -12,7 +12,7 @@ dependencies = [
 ]
 
 [project.scripts]
-prohori-ai = "prohori_ai:main"
+prohori-ai = "prohori_ai.main:main"
 
 [build-system]
 requires = ["uv_build>=0.12.5,<0.13.0"]
@@ -33,4 +33,18 @@ target-version ="py312"
 src = ["src", "tests"]
 
 [tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "I",    # Import sorting
+    "B",    # Bugbear
+]
+
+[tool.uv.build-backend]
+module-name = "prohori_ai"
+module-root = "src"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
 
