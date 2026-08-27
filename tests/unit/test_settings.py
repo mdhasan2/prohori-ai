@@ -1,12 +1,14 @@
 """Tests for ProhoriAI environment configuration."""
-
-# from prohori_ai.config.settings import Settings, get_settings
+import pytest
 
 from prohori_ai.config.settings import Settings, get_settings
 
-
-def test_settings_use_secure_defaults() -> None:
+def test_settings_use_secure_defaults(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """Human approval should be required unless explicitly configured otherwise."""
+    monkeypatch.delenv("PROHORIAI_ENVIRONMENT", raising=False)
+    
     settings = Settings(_env_file=None)
 
     assert settings.environment == "development"
