@@ -18,3 +18,10 @@ app = FastAPI()
 def health() -> dict[str, str]:
     """Report whether the lab service is running."""
     return {"status": "healthy"}
+
+@app.get("/")
+def root() -> dict[str, str]:
+    """Describe the local lab service."""
+    return {
+        "name": "Prohori AI Path Traversal Lab"
+    }
