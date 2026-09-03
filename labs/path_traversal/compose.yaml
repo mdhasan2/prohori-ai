@@ -3,10 +3,23 @@ services:
     build:
       context: .
     ports:
-      - "127.0.0.1:8080:8000"
+      - "127.0.0.1:18080:8000"
     
     networks:
       - lab_internal
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2)"
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
 
 networks:
   lab_internal:

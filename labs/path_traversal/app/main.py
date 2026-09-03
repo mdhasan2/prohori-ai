@@ -12,3 +12,9 @@ class LabMode(StrEnum):
 
 
 app = FastAPI()
+
+
+@app.get("/health")
+def health() -> dict[str, str]:
+    """Report whether the lab service is running."""
+    return {"status": "healthy"}

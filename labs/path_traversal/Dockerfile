@@ -7,6 +7,7 @@ RUN pip install \
     -r requirements.txt
 
 COPY app ./app
+copy data ./data
 
 EXPOSE 8000
 
