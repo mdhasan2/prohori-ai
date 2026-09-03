@@ -1,0 +1,13 @@
+services:
+  lab:
+    build:
+      context: .
+    ports:
+      - "127.0.0.1:8080:8000"
+    
+    networks:
+      - lab_internal
+
+networks:
+  lab_internal:
+    internal: true
