@@ -4,12 +4,23 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8000:8000"
+      - "127.0.0.1:18080:8000"
     
     networks:
       - lab_internal
 
     read_only: true
+
+    tmpfs:
+      - /tmp
+    
+    cap_drop:
+      - ALL
+
+    security_opt:
+      - no-new-privileges:true
+
+    pids_limit: 64
 
     healthcheck:
       test:
@@ -26,4 +37,4 @@ services:
 
 networks:
   lab_internal:
-    internal: true
+    internal: false
