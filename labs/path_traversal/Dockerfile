@@ -17,7 +17,7 @@ RUN useradd \
     labuser \
     && chown -R labuser:labuser /lab
 
-USER 1001
+USER labuser
 
 EXPOSE 8000
 
