@@ -80,6 +80,8 @@ def get_mode() -> LabMode:
         LabMode.REMEDIATED.value,
     )
 
+    print(raw_mode)
+
     try:
         return LabMode(raw_mode)
     except ValueError as exc:
