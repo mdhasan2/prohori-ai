@@ -1,0 +1,1 @@
+from prohori_ai.mcp.assets.server import create_asset_context_server
