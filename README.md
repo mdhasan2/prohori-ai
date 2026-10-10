@@ -23,37 +23,26 @@ The project is intended for authorized security testing, controlled laboratories
 
 ## Implementation grid
 
-> **Runbook milestone:** 🟢 Phase 1 implementation runbook completed (user-reported; [conversation](https://chatgpt.com/share/6acaa341-3304-83e9-b4b6-88741f59a5e2)). **This does not mark Project Phase 1 or the whole project complete.** Individual Phase 1 deliverables remain pending independent verification.
+> **Milestone:** 🟢 Phase 1 *implementation runbook* completed (user-reported; [conversation](https://chatgpt.com/share/6acaa341-3304-83e9-b4b6-88741f59a5e2)). This is **not** completion of the entire Project Phase 1; its individual deliverables remain unverified.
 
-| Phase | Item | Item | Item | Item |
-|:--|:--|:--|:--|:--|
-| **1 · Foundation** | 🟢 Runbook 1 complete | ⚪ Python 3.12 verify | ⚪ uv/lock verify | ⚪ Layout verify |
-|  | ⚪ Ruff verify | ⚪ mypy verify | ⚪ pytest verify | ⚪ pre-commit verify |
-|  | ⚪ Settings verify | ⚪ CI verify |   |   |
-| **2 · Domain** | ⚪ Asset model | ⚪ Target model | ⚪ Scope model | ⚪ Auth record |
-|  | ⚪ Approval record | ⚪ Finding model | ⚪ Evidence model | ⚪ Invariants |
-|  | ⚪ Unit tests |   |   |   |
-| **3 · Policy** | ⚪ ScopePolicy | ⚪ ToolCapability | ⚪ Default deny | ⚪ Passive rules |
-|  | ⚪ Active rules | ⚪ Approval gates | ⚪ Policy tests |   |
-| **4 · Local lab** | ⚪ FastAPI lab | ⚪ Docker isolation | ⚪ Vulnerable state | ⚪ Fixed state |
-|  | ⚪ Evidence checks | ⚪ Health checks | ⚪ Isolation tests | ⚪ Threat model |
-| **5 · MCP foundation** | ⚪ Asset MCP | ⚪ Testing MCP | ⚪ Tool schemas | ⚪ Passive checks |
-|  | ⚪ Active controls | ⚪ Target allowlist | ⚪ Command rejection | ⚪ MCP tests |
-| **6 · Workflow** | ⚪ State schema | ⚪ Step executor | ⚪ Policy checks | ⚪ Evidence capture |
-|  | ⚪ Audit events | ⚪ Failure tests |   |   |
-| **7 · Supervisor** | ⚪ LangGraph state | ⚪ Routing | ⚪ Checkpoints | ⚪ Approval interrupt |
-|  | ⚪ Retry limits | ⚪ Timeouts | ⚪ Failure states | ⚪ Resume tests |
-| **8 · Red Agent** | ⚪ Asset observe | ⚪ Hypotheses | ⚪ Passive evidence | ⚪ Test proposal |
-|  | ⚪ Scope enforcement | ⚪ Approval check | ⚪ Findings |   |
-| **9 · Azure deploy** | ⚪ Env separation | ⚪ Containers | ⚪ ACR | ⚪ Azure compute |
-|  | ⚪ Private network | ⚪ Service routing | ⚪ Health probes | ⚪ Diagram/ADR |
-| **10 · Azure auth** | ⚪ Identity model | ⚪ Managed identity | ⚪ Entra ID | ⚪ Least-privilege RBAC |
-|  | ⚪ Policy mapping | ⚪ MCP auth boundary | ⚪ Approval binding | ⚪ Escalation tests |
-| **11 · Production MCP** | ⚪ MCP deployment | ⚪ Tool schemas | ⚪ Authentication | ⚪ Authorization |
-|  | ⚪ Asset allowlist | ⚪ Input validation | ⚪ Injection defenses | ⚪ Time limits |
-|  | ⚪ Action budgets | ⚪ Audit/evidence | ⚪ Correlation IDs | ⚪ Adversarial tests |
+Each **column is one project phase**; each cell is a smallest-trackable item. On narrow screens, scroll horizontally to see later phases.
 
-Each cell represents one small deliverable or verification task. Mark it 🟡 while working, and 🟢 only after its acceptance criteria pass. No offensive-security execution capability is claimed as implemented.
+| **1 · Foundation** | **2 · Domain** | **3 · Policy** | **4 · Lab** | **5 · MCP** | **6 · Workflow** | **7 · Supervisor** | **8 · Red Agent** | **9 · Azure** | **10 · Identity** | **11 · Prod MCP** |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 🟢 Runbook 1 | ⚪ Asset | ⚪ ScopePolicy | ⚪ FastAPI | ⚪ Asset MCP | ⚪ State | ⚪ LangGraph | ⚪ Observe | ⚪ Environments | ⚪ Threat model | ⚪ Deploy |
+| ⚪ Python verify | ⚪ Target | ⚪ Capability | ⚪ Docker | ⚪ Test MCP | ⚪ Executor | ⚪ Routing | ⚪ Hypotheses | ⚪ Containers | ⚪ Managed ID | ⚪ Schemas |
+| ⚪ uv/lock | ⚪ Scope | ⚪ Default deny | ⚪ Vulnerable | ⚪ Schemas | ⚪ Policy check | ⚪ Checkpoints | ⚪ Evidence | ⚪ ACR | ⚪ Entra | ⚪ AuthN |
+| ⚪ Layout | ⚪ Auth record | ⚪ Passive | ⚪ Remediated | ⚪ Passive | ⚪ Evidence | ⚪ Interrupts | ⚪ Proposals | ⚪ Compute | ⚪ RBAC | ⚪ AuthZ |
+| ⚪ Ruff | ⚪ Approval | ⚪ Active | ⚪ Evidence | ⚪ Active | ⚪ Audit | ⚪ Retries | ⚪ Scope check | ⚪ Network | ⚪ Policy map | ⚪ Allowlist |
+| ⚪ mypy | ⚪ Finding | ⚪ Approval gate | ⚪ Health | ⚪ Allowlist | ⚪ Failure tests | ⚪ Timeouts | ⚪ Approval | ⚪ Routing | ⚪ MCP auth | ⚪ Validation |
+| ⚪ pytest | ⚪ Evidence | ⚪ Tests | ⚪ Isolation | ⚪ Reject cmd |   | ⚪ Fail states | ⚪ Findings | ⚪ Probes | ⚪ Approval bind | ⚪ Injection |
+| ⚪ pre-commit | ⚪ Invariants |   | ⚪ Threat model | ⚪ Tests |   | ⚪ Resume |   | ⚪ ADR | ⚪ Escalation tests | ⚪ Timeouts |
+| ⚪ Settings | ⚪ Tests |   |   |   |   |   |   |   |   | ⚪ Budgets |
+| ⚪ CI |   |   |   |   |   |   |   |   |   | ⚪ Audit |
+|   |   |   |   |   |   |   |   |   |   | ⚪ Trace IDs |
+|   |   |   |   |   |   |   |   |   |   | ⚪ Adversarial tests |
+
+No offensive-security execution capability is claimed as implemented.
 
 ## Project structure
 
