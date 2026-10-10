@@ -21,29 +21,6 @@ The project is intended for authorized security testing, controlled laboratories
 - No autonomous expansion of scope
 - Reproducible testing and evaluation
 
-## Implementation grid
-
-> **Milestone:** 🟢 Phase 1 *implementation runbook* completed (user-reported; [conversation](https://chatgpt.com/share/6acaa341-3304-83e9-b4b6-88741f59a5e2)). This is **not** completion of the entire Project Phase 1; its individual deliverables remain unverified.
-
-Each **column is one project phase**; each cell is a smallest-trackable item. On narrow screens, scroll horizontally to see later phases.
-
-| **1 · Foundation** | **2 · Domain** | **3 · Policy** | **4 · Lab** | **5 · MCP** | **6 · Workflow** | **7 · Supervisor** | **8 · Red Agent** | **9 · Azure** | **10 · Identity** | **11 · Prod MCP** |
-|---|---|---|---|---|---|---|---|---|---|---|
-| 🟢 Runbook 1 | ⚪ Asset | ⚪ ScopePolicy | ⚪ FastAPI | ⚪ Asset MCP | ⚪ State | ⚪ LangGraph | ⚪ Observe | ⚪ Environments | ⚪ Threat model | ⚪ Deploy |
-| ⚪ Python verify | ⚪ Target | ⚪ Capability | ⚪ Docker | ⚪ Test MCP | ⚪ Executor | ⚪ Routing | ⚪ Hypotheses | ⚪ Containers | ⚪ Managed ID | ⚪ Schemas |
-| ⚪ uv/lock | ⚪ Scope | ⚪ Default deny | ⚪ Vulnerable | ⚪ Schemas | ⚪ Policy check | ⚪ Checkpoints | ⚪ Evidence | ⚪ ACR | ⚪ Entra | ⚪ AuthN |
-| ⚪ Layout | ⚪ Auth record | ⚪ Passive | ⚪ Remediated | ⚪ Passive | ⚪ Evidence | ⚪ Interrupts | ⚪ Proposals | ⚪ Compute | ⚪ RBAC | ⚪ AuthZ |
-| ⚪ Ruff | ⚪ Approval | ⚪ Active | ⚪ Evidence | ⚪ Active | ⚪ Audit | ⚪ Retries | ⚪ Scope check | ⚪ Network | ⚪ Policy map | ⚪ Allowlist |
-| ⚪ mypy | ⚪ Finding | ⚪ Approval gate | ⚪ Health | ⚪ Allowlist | ⚪ Failure tests | ⚪ Timeouts | ⚪ Approval | ⚪ Routing | ⚪ MCP auth | ⚪ Validation |
-| ⚪ pytest | ⚪ Evidence | ⚪ Tests | ⚪ Isolation | ⚪ Reject cmd |   | ⚪ Fail states | ⚪ Findings | ⚪ Probes | ⚪ Approval bind | ⚪ Injection |
-| ⚪ pre-commit | ⚪ Invariants |   | ⚪ Threat model | ⚪ Tests |   | ⚪ Resume |   | ⚪ ADR | ⚪ Escalation tests | ⚪ Timeouts |
-| ⚪ Settings | ⚪ Tests |   |   |   |   |   |   |   |   | ⚪ Budgets |
-| ⚪ CI |   |   |   |   |   |   |   |   |   | ⚪ Audit |
-|   |   |   |   |   |   |   |   |   |   | ⚪ Trace IDs |
-|   |   |   |   |   |   |   |   |   |   | ⚪ Adversarial tests |
-
-No offensive-security execution capability is claimed as implemented.
-
 ## Project structure
 
 ```text
@@ -105,7 +82,7 @@ Use Prohori AI only in systems and environments for which you have explicit, doc
 
 ## Status legend
 
-- 🟢 **Completed** — implementation reported complete; see scope and verification notes above.
+- 🟢 **Completed** — the marked item is reported complete.
 - 🟡 **In progress** — implementation is actively underway.
 - ⚪ **Planned** — implementation has not started yet.
 - 🔴 **Blocked** — progress is currently blocked by a dependency or unresolved issue.
@@ -113,3 +90,20 @@ Use Prohori AI only in systems and environments for which you have explicit, doc
 ## License
 
 A license has not yet been selected.
+
+## Implementation grid
+
+| **Foundation** | **Domain** | **Policy** | **Lab** | **MCP** | **Workflow** | **Supervisor** | **Red Agent** | **Azure** | **Identity** | **Prod MCP** |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 🟢 Runbook | ⚪ Asset | ⚪ Scope | ⚪ FastAPI | ⚪ Assets | ⚪ State | ⚪ Graph | ⚪ Observe | ⚪ Envs | ⚪ Threats | ⚪ Deploy |
+| ⚪ Python | ⚪ Target | ⚪ Capability | ⚪ Docker | ⚪ Testing | ⚪ Execute | ⚪ Routes | ⚪ Theory | ⚪ Images | ⚪ Mgd ID | ⚪ Schemas |
+| ⚪ uv | ⚪ Scope | ⚪ Deny | ⚪ Vuln | ⚪ Schemas | ⚪ Policy | ⚪ Saves | ⚪ Evidence | ⚪ ACR | ⚪ Entra | ⚪ AuthN |
+| ⚪ Layout | ⚪ Auth | ⚪ Passive | ⚪ Fixed | ⚪ Passive | ⚪ Evidence | ⚪ Pause | ⚪ Propose | ⚪ Compute | ⚪ RBAC | ⚪ AuthZ |
+| ⚪ Ruff | ⚪ Approval | ⚪ Active | ⚪ Proof | ⚪ Active | ⚪ Audit | ⚪ Retries | ⚪ Scope | ⚪ Network | ⚪ Policy | ⚪ Allowlist |
+| ⚪ mypy | ⚪ Finding | ⚪ Approval | ⚪ Health | ⚪ Allowlist | ⚪ Fail tests | ⚪ Timeouts | ⚪ Approval | ⚪ Routing | ⚪ MCP auth | ⚪ Validate |
+| ⚪ pytest | ⚪ Evidence | ⚪ Tests | ⚪ Isolation | ⚪ Cmd deny |   | ⚪ Failures | ⚪ Findings | ⚪ Probes | ⚪ Approvals | ⚪ Injection |
+| ⚪ Hooks | ⚪ Rules |   | ⚪ Threats | ⚪ Tests |   | ⚪ Resume |   | ⚪ ADR | ⚪ Escalation | ⚪ Timeouts |
+| ⚪ Config | ⚪ Tests |   |   |   |   |   |   |   |   | ⚪ Budgets |
+| ⚪ CI |   |   |   |   |   |   |   |   |   | ⚪ Audit |
+|   |   |   |   |   |   |   |   |   |   | ⚪ Trace IDs |
+|   |   |   |   |   |   |   |   |   |   | ⚪ Adv tests |
