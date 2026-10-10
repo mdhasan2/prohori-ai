@@ -21,25 +21,39 @@ The project is intended for authorized security testing, controlled laboratories
 - No autonomous expansion of scope
 - Reproducible testing and evaluation
 
-## Implementation roadmap
+## Implementation grid
 
-> **Progress tracking:** 🟢 The **Phase 1 implementation runbook** was completed, as reported in the [runbook conversation](https://chatgpt.com/share/6acaa341-3304-83e9-b4b6-88741f59a5e2). That does **not** mean the whole Prohori AI project—or all work in Project Phase 1—is complete. The shared conversation could not be independently inspected here, so completion of individual project deliverables has not been assumed.
+> **Runbook milestone:** 🟢 Phase 1 implementation runbook completed (user-reported; [conversation](https://chatgpt.com/share/6acaa341-3304-83e9-b4b6-88741f59a5e2)). **This does not mark Project Phase 1 or the whole project complete.** Individual Phase 1 deliverables remain pending independent verification.
 
-| Project phase and implementation items (with status) |
-|---|
-| **1. Repository & development foundation** — 🟡 **Project phase: in progress / not independently verified**<br>🟢 **Phase 1 implementation runbook: completed (user-reported)**<br>⚪ Independently verify Python 3.12, `uv`, package layout, Ruff, mypy, pytest, pre-commit, validated settings, and GitHub Actions against project acceptance criteria |
-| **2. Domain model** — ⚪ Planned<br>⚪ Asset/target and scope models · authorization and approval records · findings/evidence schemas · invariants and unit tests |
-| **3. Policy & capability controls** — ⚪ Planned<br>⚪ `ScopePolicy` · `ToolCapability` · default-deny rules · passive/active separation · approval gates · tests |
-| **4. Intentionally vulnerable local lab** — ⚪ Planned<br>⚪ Docker-isolated FastAPI lab · vulnerable/remediated states · deterministic evidence · health/isolation tests · threat model |
-| **5. MCP foundation** — ⚪ Planned<br>⚪ Asset Context server · Security Testing server · passive/active tool boundaries · target/command restrictions · tests |
-| **6. Deterministic workflow** — ⚪ Planned<br>⚪ State lifecycle · ordered execution · pre-execution policy checks · evidence capture · audit events · failure tests |
-| **7. Supervisor orchestration** — ⚪ Planned<br>⚪ LangGraph state/routing · checkpoints · approval interrupts · bounded retries/timeouts · failure/resumption paths |
-| **8. Red Agent** — ⚪ Planned<br>⚪ Asset observation · hypotheses · passive evidence · validation proposals · scope/approval enforcement · structured findings |
-| **9. Azure architecture & deployment** — ⚪ Planned<br>⚪ Dev/staging/prod · containers and ACR · Azure compute · private networking · health probes · architecture diagram/ADR |
-| **10. Azure identity & authorization** — ⚪ Planned<br>⚪ Identity threat model · managed identities/Entra ID · RBAC · `ScopePolicy`/`ToolCapability` mapping · approval binding · escalation tests |
-| **11. Production MCP services & controlled validation** — ⚪ Planned<br>⚪ MCP deployment and schemas · request auth · asset allowlists · input normalization · injection defenses · action budgets · audit/correlation IDs · adversarial tests |
+| Phase | Item | Item | Item | Item |
+|:--|:--|:--|:--|:--|
+| **1 · Foundation** | 🟢 Runbook 1 complete | ⚪ Python 3.12 verify | ⚪ uv/lock verify | ⚪ Layout verify |
+|  | ⚪ Ruff verify | ⚪ mypy verify | ⚪ pytest verify | ⚪ pre-commit verify |
+|  | ⚪ Settings verify | ⚪ CI verify |   |   |
+| **2 · Domain** | ⚪ Asset model | ⚪ Target model | ⚪ Scope model | ⚪ Auth record |
+|  | ⚪ Approval record | ⚪ Finding model | ⚪ Evidence model | ⚪ Invariants |
+|  | ⚪ Unit tests |   |   |   |
+| **3 · Policy** | ⚪ ScopePolicy | ⚪ ToolCapability | ⚪ Default deny | ⚪ Passive rules |
+|  | ⚪ Active rules | ⚪ Approval gates | ⚪ Policy tests |   |
+| **4 · Local lab** | ⚪ FastAPI lab | ⚪ Docker isolation | ⚪ Vulnerable state | ⚪ Fixed state |
+|  | ⚪ Evidence checks | ⚪ Health checks | ⚪ Isolation tests | ⚪ Threat model |
+| **5 · MCP foundation** | ⚪ Asset MCP | ⚪ Testing MCP | ⚪ Tool schemas | ⚪ Passive checks |
+|  | ⚪ Active controls | ⚪ Target allowlist | ⚪ Command rejection | ⚪ MCP tests |
+| **6 · Workflow** | ⚪ State schema | ⚪ Step executor | ⚪ Policy checks | ⚪ Evidence capture |
+|  | ⚪ Audit events | ⚪ Failure tests |   |   |
+| **7 · Supervisor** | ⚪ LangGraph state | ⚪ Routing | ⚪ Checkpoints | ⚪ Approval interrupt |
+|  | ⚪ Retry limits | ⚪ Timeouts | ⚪ Failure states | ⚪ Resume tests |
+| **8 · Red Agent** | ⚪ Asset observe | ⚪ Hypotheses | ⚪ Passive evidence | ⚪ Test proposal |
+|  | ⚪ Scope enforcement | ⚪ Approval check | ⚪ Findings |   |
+| **9 · Azure deploy** | ⚪ Env separation | ⚪ Containers | ⚪ ACR | ⚪ Azure compute |
+|  | ⚪ Private network | ⚪ Service routing | ⚪ Health probes | ⚪ Diagram/ADR |
+| **10 · Azure auth** | ⚪ Identity model | ⚪ Managed identity | ⚪ Entra ID | ⚪ Least-privilege RBAC |
+|  | ⚪ Policy mapping | ⚪ MCP auth boundary | ⚪ Approval binding | ⚪ Escalation tests |
+| **11 · Production MCP** | ⚪ MCP deployment | ⚪ Tool schemas | ⚪ Authentication | ⚪ Authorization |
+|  | ⚪ Asset allowlist | ⚪ Input validation | ⚪ Injection defenses | ⚪ Time limits |
+|  | ⚪ Action budgets | ⚪ Audit/evidence | ⚪ Correlation IDs | ⚪ Adversarial tests |
 
-No offensive-security execution capability is claimed as implemented solely because the Phase 1 runbook was completed.
+Each cell represents one small deliverable or verification task. Mark it 🟡 while working, and 🟢 only after its acceptance criteria pass. No offensive-security execution capability is claimed as implemented.
 
 ## Project structure
 
