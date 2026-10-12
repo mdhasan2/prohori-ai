@@ -76,34 +76,44 @@ uv run pytest
 uv run pre-commit run --all-files
 ```
 
+## Next steps
+
+1. **Finish the local lab remediation:** replace the placeholder `read_file_remediated()` in `labs/path_traversal/app/main.py` with path containment checks, and ensure forbidden paths fail closed.
+2. **Verify lab behavior:** add automated tests showing permitted reads work, traversal is reproducible only in vulnerable mode, and remediated mode rejects it.
+3. **Tighten lab isolation:** confirm container and network restrictions; the Compose network currently sets `internal: false`. Keep the service bound to `127.0.0.1`.
+4. **Strengthen MCP validation:** test Asset Context resource payloads, authorized asset relationships, unknown assets, and invalid requests rather than resource discovery alone.
+5. **Complete foundation verification:** run local pre-commit checks and confirm required quality gates stay green in GitHub Actions; add a CI pre-commit step if desired.
+6. **Start domain and policy controls:** add typed asset/scope/approval/evidence models, then default-deny `ScopePolicy` and `ToolCapability` tests before enabling active tool calls.
+
 ## Responsible-use notice
 
 Use Prohori AI only in systems and environments for which you have explicit, documented authorization. Users are responsible for complying with all applicable laws, policies, rules of engagement, and contractual restrictions.
 
 ## Status legend
 
-- 🟢 **Completed** — the marked item is reported complete.
+- 🟢 **Completed** — implementation exists and is supported by repository evidence.
+- A configured check is not proof that it passed; statuses are scoped to the named deliverable.
 - 🟡 **In progress** — implementation is actively underway.
 - ⚪ **Planned** — implementation has not started yet.
 - 🔴 **Blocked** — progress is currently blocked by a dependency or unresolved issue.
 
 ## License
 
-A license has not yet been selected.
+This project is licensed under the [MIT License](LICENSE).
 
 ## Implementation grid
 
 | **Foundation** | **Domain** | **Policy** | **Lab** | **MCP** | **Workflow** | **Supervisor** | **Red Agent** | **Azure** | **Identity** | **Prod MCP** |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 🟢 Runbook | ⚪ Asset | ⚪ Scope | ⚪ FastAPI | ⚪ Assets | ⚪ State | ⚪ Graph | ⚪ Observe | ⚪ Envs | ⚪ Threats | ⚪ Deploy |
-| ⚪ Python | ⚪ Target | ⚪ Capability | ⚪ Docker | ⚪ Testing | ⚪ Execute | ⚪ Routes | ⚪ Theory | ⚪ Images | ⚪ Mgd ID | ⚪ Schemas |
-| ⚪ uv | ⚪ Scope | ⚪ Deny | ⚪ Vuln | ⚪ Schemas | ⚪ Policy | ⚪ Saves | ⚪ Evidence | ⚪ ACR | ⚪ Entra | ⚪ AuthN |
-| ⚪ Layout | ⚪ Auth | ⚪ Passive | ⚪ Fixed | ⚪ Passive | ⚪ Evidence | ⚪ Pause | ⚪ Propose | ⚪ Compute | ⚪ RBAC | ⚪ AuthZ |
-| ⚪ Ruff | ⚪ Approval | ⚪ Active | ⚪ Proof | ⚪ Active | ⚪ Audit | ⚪ Retries | ⚪ Scope | ⚪ Network | ⚪ Policy | ⚪ Allowlist |
-| ⚪ mypy | ⚪ Finding | ⚪ Approval | ⚪ Health | ⚪ Allowlist | ⚪ Fail tests | ⚪ Timeouts | ⚪ Approval | ⚪ Routing | ⚪ MCP auth | ⚪ Validate |
-| ⚪ pytest | ⚪ Evidence | ⚪ Tests | ⚪ Isolation | ⚪ Cmd deny |   | ⚪ Failures | ⚪ Findings | ⚪ Probes | ⚪ Approvals | ⚪ Injection |
-| ⚪ Hooks | ⚪ Rules |   | ⚪ Threats | ⚪ Tests |   | ⚪ Resume |   | ⚪ ADR | ⚪ Escalation | ⚪ Timeouts |
-| ⚪ Config | ⚪ Tests |   |   |   |   |   |   |   |   | ⚪ Budgets |
-| ⚪ CI |   |   |   |   |   |   |   |   |   | ⚪ Audit |
+| 🟢 Python | ⚪ Asset | ⚪ Scope | 🟢 FastAPI | 🟡 Assets | ⚪ State | ⚪ Graph | ⚪ Observe | ⚪ Envs | ⚪ Threats | ⚪ Deploy |
+| 🟢 uv | ⚪ Target | ⚪ Capability | 🟢 Docker | ⚪ Testing | ⚪ Execute | ⚪ Routes | ⚪ Theory | ⚪ Images | ⚪ Mgd ID | ⚪ Schemas |
+| 🟢 Layout | ⚪ Scope | ⚪ Deny | 🟢 Vuln | 🟡 Schemas | ⚪ Policy | ⚪ Saves | ⚪ Evidence | ⚪ ACR | ⚪ Entra | ⚪ AuthN |
+| 🟢 Ruff | ⚪ Auth | ⚪ Passive | ⚪ Fixed | ⚪ Passive | ⚪ Evidence | ⚪ Pause | ⚪ Propose | ⚪ Compute | ⚪ RBAC | ⚪ AuthZ |
+| 🟢 mypy | ⚪ Approval | ⚪ Active | 🟡 Proof | ⚪ Active | ⚪ Audit | ⚪ Retries | ⚪ Scope | ⚪ Network | ⚪ Policy | ⚪ Allowlist |
+| 🟢 pytest | ⚪ Finding | ⚪ Approval | 🟢 Health | 🟡 Allowlist | ⚪ Fail tests | ⚪ Timeouts | ⚪ Approval | ⚪ Routing | ⚪ MCP auth | ⚪ Validate |
+| 🟢 Hooks cfg | ⚪ Evidence | ⚪ Tests | 🟡 Isolation | ⚪ Cmd deny |   | ⚪ Failures | ⚪ Findings | ⚪ Probes | ⚪ Approvals | ⚪ Injection |
+| 🟢 Config | ⚪ Rules |   | ⚪ Threats | 🟡 Tests |   | ⚪ Resume |   | ⚪ ADR | ⚪ Escalation | ⚪ Timeouts |
+| 🟢 CI cfg | ⚪ Tests |   |   |   |   |   |   |   |   | ⚪ Budgets |
+|   |   |   |   |   |   |   |   |   |   | ⚪ Audit |
 |   |   |   |   |   |   |   |   |   |   | ⚪ Trace IDs |
 |   |   |   |   |   |   |   |   |   |   | ⚪ Adv tests |
