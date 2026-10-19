@@ -78,12 +78,14 @@ uv run pre-commit run --all-files
 
 ## Next steps
 
-1. **Finish the local lab remediation:** replace the placeholder `read_file_remediated()` in `labs/path_traversal/app/main.py` with path containment checks, and ensure forbidden paths fail closed.
-2. **Verify lab behavior:** add automated tests showing permitted reads work, traversal is reproducible only in vulnerable mode, and remediated mode rejects it.
-3. **Tighten lab isolation:** confirm container and network restrictions; the Compose network currently sets `internal: false`. Keep the service bound to `127.0.0.1`.
-4. **Strengthen MCP validation:** test Asset Context resource payloads, authorized asset relationships, unknown assets, and invalid requests rather than resource discovery alone.
-5. **Complete foundation verification:** run local pre-commit checks and confirm required quality gates stay green in GitHub Actions; add a CI pre-commit step if desired.
-6. **Start domain and policy controls:** add typed asset/scope/approval/evidence models, then default-deny `ScopePolicy` and `ToolCapability` tests before enabling active tool calls.
+The latest audited `main` commit (`57bb027`, October 14, 2026) introduced Phase 2 domain models and tests, but the [CI run](https://github.com/mdhasan2/prohori-ai/actions/runs/38499178440) **failed at Ruff formatting**. Lint, mypy, and pytest did not execute in that run. Do not treat the new models or tests as fully verified yet.
+
+1. **Restore green CI:** run `uv run ruff format .`, then `uv run ruff check .`, `uv run mypy src`, and `uv run pytest`; fix all findings and confirm the next GitHub Actions run passes.
+2. **Complete Phase 2 validation:** correct the `FindingStatus.CONFIRMED` value (`"confiremed"`), add approval/audit tests, invalid-input and serialization tests, and enforce timezone-aware approval expiry.
+3. **Finish domain boundaries:** implement asset, target, scope, and authorization models; define and test legal investigation state transitions.
+4. **Finish lab remediation:** replace the `read_file_remediated()` placeholder and test allowed file reads, blocked traversal, and vulnerable-only reproduction.
+5. **Review lab isolation:** validate Docker restrictions, loopback-only binding, and the Compose network setting (`internal: false`); document the local lab threat model.
+6. **Strengthen Asset Context MCP:** expose/validate asset relationships; test resource contents, unauthorized/unknown assets, and invalid requests (the registry unit-test file is currently empty).
 
 ## Responsible-use notice
 
@@ -105,15 +107,16 @@ This project is licensed under the [MIT License](LICENSE).
 
 | **Foundation** | **Domain** | **Policy** | **Lab** | **MCP** | **Workflow** | **Supervisor** | **Red Agent** | **Azure** | **Identity** | **Prod MCP** |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 🟢 Python | ⚪ Asset | ⚪ Scope | 🟢 FastAPI | 🟡 Assets | ⚪ State | ⚪ Graph | ⚪ Observe | ⚪ Envs | ⚪ Threats | ⚪ Deploy |
-| 🟢 uv | ⚪ Target | ⚪ Capability | 🟢 Docker | ⚪ Testing | ⚪ Execute | ⚪ Routes | ⚪ Theory | ⚪ Images | ⚪ Mgd ID | ⚪ Schemas |
-| 🟢 Layout | ⚪ Scope | ⚪ Deny | 🟢 Vuln | 🟡 Schemas | ⚪ Policy | ⚪ Saves | ⚪ Evidence | ⚪ ACR | ⚪ Entra | ⚪ AuthN |
-| 🟢 Ruff | ⚪ Auth | ⚪ Passive | ⚪ Fixed | ⚪ Passive | ⚪ Evidence | ⚪ Pause | ⚪ Propose | ⚪ Compute | ⚪ RBAC | ⚪ AuthZ |
-| 🟢 mypy | ⚪ Approval | ⚪ Active | 🟡 Proof | ⚪ Active | ⚪ Audit | ⚪ Retries | ⚪ Scope | ⚪ Network | ⚪ Policy | ⚪ Allowlist |
-| 🟢 pytest | ⚪ Finding | ⚪ Approval | 🟢 Health | 🟡 Allowlist | ⚪ Fail tests | ⚪ Timeouts | ⚪ Approval | ⚪ Routing | ⚪ MCP auth | ⚪ Validate |
-| 🟢 Hooks cfg | ⚪ Evidence | ⚪ Tests | 🟡 Isolation | ⚪ Cmd deny |   | ⚪ Failures | ⚪ Findings | ⚪ Probes | ⚪ Approvals | ⚪ Injection |
-| 🟢 Config | ⚪ Rules |   | ⚪ Threats | 🟡 Tests |   | ⚪ Resume |   | ⚪ ADR | ⚪ Escalation | ⚪ Timeouts |
-| 🟢 CI cfg | ⚪ Tests |   |   |   |   |   |   |   |   | ⚪ Budgets |
-|   |   |   |   |   |   |   |   |   |   | ⚪ Audit |
-|   |   |   |   |   |   |   |   |   |   | ⚪ Trace IDs |
-|   |   |   |   |   |   |   |   |   |   | ⚪ Adv tests |
+| 🟢 Python | 🟡 Invest | ⚪ Scope | 🟢 FastAPI | 🟡 Assets | ⚪ State | ⚪ Graph | ⚪ Observe | ⚪ Envs | ⚪ Threats | ⚪ Deploy |
+| 🟢 uv | 🟡 Evidence | ⚪ Capability | 🟢 Docker | ⚪ Testing | ⚪ Execute | ⚪ Routes | ⚪ Theory | ⚪ Images | ⚪ Mgd ID | ⚪ Schemas |
+| 🟢 Layout | 🟡 Risk | ⚪ Deny | 🟢 Vuln | 🟡 Schemas | ⚪ Policy | ⚪ Saves | ⚪ Evidence | ⚪ ACR | ⚪ Entra | ⚪ AuthN |
+| 🟢 Ruff cfg | 🟡 Finding | ⚪ Passive | ⚪ Fixed | ⚪ Passive | ⚪ Evidence | ⚪ Pause | ⚪ Propose | ⚪ Compute | ⚪ RBAC | ⚪ AuthZ |
+| 🟢 mypy cfg | 🟡 Approval | ⚪ Active | 🟡 Proof | ⚪ Active | ⚪ Audit | ⚪ Retries | ⚪ Scope | ⚪ Network | ⚪ Policy | ⚪ Allowlist |
+| 🟢 pytest cfg | 🟡 Audit | ⚪ Approval | 🟢 Health | 🟡 Allowlist | ⚪ Fail tests | ⚪ Timeouts | ⚪ Approval | ⚪ Routing | ⚪ MCP auth | ⚪ Validate |
+| 🟢 Hooks cfg | 🟡 Validation | ⚪ Tests | 🟡 Isolation | ⚪ Cmd deny |   | ⚪ Failures | ⚪ Findings | ⚪ Probes | ⚪ Approvals | ⚪ Injection |
+| 🟢 Config | 🟡 Tests |   | ⚪ Threats | 🟡 Tests |   | ⚪ Resume |   | ⚪ ADR | ⚪ Escalation | ⚪ Timeouts |
+| 🟢 CI cfg | ⚪ Asset |   |   |   |   |   |   |   |   | ⚪ Budgets |
+| 🔴 CI format | ⚪ Target |   |   |   |   |   |   |   |   | ⚪ Audit |
+|   | ⚪ Scope |   |   |   |   |   |   |   |   | ⚪ Trace IDs |
+|   | ⚪ Auth |   |   |   |   |   |   |   |   | ⚪ Adv tests |
+|   | ⚪ Transitions |   |   |   |   |   |   |   |   |   |
