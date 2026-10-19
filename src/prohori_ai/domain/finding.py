@@ -1,4 +1,3 @@
-
 from datetime import datetime
 from enum import StrEnum
 from uuid import UUID
@@ -15,6 +14,7 @@ class FindingStatus(StrEnum):
     REJECTED = "rejected"
     ACCEPTED_RISK = "accepted_risk"
     REMEDIATED = "remediated"
+
 
 class Finding(TimestampedModel):
     id: UUID = Field(default_factory=new_id)
@@ -36,6 +36,4 @@ class Finding(TimestampedModel):
 
     risk: RiskAssessment | None = None
 
-    created_at: datetime = Field(
-        default_factory=utc_now
-    )
+    created_at: datetime = Field(default_factory=utc_now)

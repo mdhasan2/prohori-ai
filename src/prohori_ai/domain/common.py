@@ -7,8 +7,10 @@ from pydantic import BaseModel, ConfigDict, field_validator
 def new_id() -> UUID:
     return uuid4()
 
+
 def utc_now() -> datetime:
     return datetime.now(UTC)
+
 
 class DomainModel(BaseModel):
     model_config = ConfigDict(
@@ -16,6 +18,7 @@ class DomainModel(BaseModel):
         frozen=True,
         str_strip_whitespace=True,
     )
+
 
 class TimestampedModel(DomainModel):
     created_at: datetime

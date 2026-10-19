@@ -27,11 +27,7 @@ def finding() -> Finding:
         description="A file endpoint may allow directory traversal.",
         status=FindingStatus.CANDIDATE,
         evidence_ids=(),
-        risk=RiskAssessment(
-            likelihood=3,
-            impact=4,
-            severity=RiskSeverity.HIGH
-        ),
+        risk=RiskAssessment(likelihood=3, impact=4, severity=RiskSeverity.HIGH),
         created_at=NOW,
     )
 
@@ -43,4 +39,3 @@ def test_create_finding(finding: Finding) -> None:
     assert finding.risk.score == 12
     assert finding.risk.severity is RiskSeverity.HIGH
     assert finding.evidence_ids == ()
-

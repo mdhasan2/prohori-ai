@@ -12,6 +12,7 @@ class RiskSeverity(StrEnum):
     HIGH = "high"
     CRITICAL = "critical"
 
+
 class RiskAssessment(DomainModel):
     likelihood: int = Field(ge=1, le=5)
     impact: int = Field(ge=1, le=5)

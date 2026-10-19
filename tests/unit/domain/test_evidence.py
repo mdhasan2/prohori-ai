@@ -11,6 +11,7 @@ from prohori_ai.domain.evidence import Evidence, EvidenceProvenance
 NOW = datetime.now(UTC)
 INVESTIGATION_ID = UUID("00000000-0000-0000-0000-000000000002")
 
+
 @pytest.fixture
 def provenance() -> EvidenceProvenance:
     return EvidenceProvenance(
