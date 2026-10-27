@@ -112,6 +112,45 @@ As of **October 26, 2026**, the latest audited `main` commit is [`40e610a`](http
 5. **Improve MCP verification:** test the allowlist's returned payloads, authorization and relationship handling, and invalid-input behavior; the asset registry unit-test file is empty and the MCP integration test checks resource discovery only.
 6. **Extend frontend validation:** connect the demo shell to a **read-only, authenticated backend status endpoint** only after its contract and authorization boundary exist; add frontend lint, type-check, build, and Vitest checks to CI. Replace the template `frontend/README.md` when real setup guidance is ready.
 
+
+7. **Deliver UI work with each backend phase:** follow the UI-01–UI-12 mapping below, adding typed contracts, Fluent UI views, real API integration, approval and workflow controls, Entra identity, accessibility, and end-to-end tests only as their server-side contracts become available.
+8. **Introduce the sandbox execution boundary:** define the adapter contract and threat model first, then build a pinned MXC integration with fail-closed backend checks and disposable lab execution. Keep policy and approval authority outside the agent's writable environment.
+9. **Prove the complete sandbox pilot:** deploy the UI, API, agents, MCP services, lab, and stores in an isolated environment; demonstrate allowed and denied execution, audit correlation, cancellation, reset, and customer handoff. Capture evidence against the target-role matrix below.
+
+## UI, role evidence, and sandbox delivery
+
+The implementation grid keeps the existing eleven project phases. Each phase now includes its frontend, containment, and verification work; UI work is part of the end-to-end capability. **UI-01 is user-reported complete**, with a demo shell present in the repository; the grid retains its existing partial status for the broader UI foundation. All newly added items are **planned**, not implementation claims.
+
+The UI roadmap remains: **UI-01** React/TypeScript setup; **UI-02** domain types; **UI-03** Fluent UI shell/navigation; **UI-04** dashboard/mock data; **UI-05** assets/scope/policy; **UI-06** FastAPI integration; **UI-07** investigations/findings/evidence; **UI-08** approvals/capabilities/emergency stop; **UI-09** supervisor/Red Agent/MCP; **UI-10** Entra/MSAL/RBAC; **UI-11** testing/security/Azure deployment; **UI-12** Microsoft HOH demonstration. These UI identifiers map across backend phases and do not change backend phase numbering. Mock views must be labeled; a rendered control is not evidence that its backend enforcement works.
+
+| Target role | Phases | Required portfolio evidence |
+| --- | --- | --- |
+| Forward Deployed Engineer — AI Security | All | Customer discovery, acceptance criteria, integrated UI/API/tools, sandbox pilot, measured results, deployment runbook, customer handoff |
+| AI Security / Agentic Security / Offensive Security Agent Engineer | Domain–Red Agent; Prod MCP | Threat model, evidence provenance, independent authorization, approval interrupts, bounded validation, adversarial evaluations |
+| Cloud Platform / Platform / Infrastructure Security Engineer | Policy; Lab; Azure; Identity; Prod MCP | Isolation boundaries, least privilege, controlled egress, managed identity, secrets handling, denied-access tests, correlated telemetry |
+| DevSecOps Engineer | Foundation; Lab; Azure; Prod MCP | Frontend/backend CI gates, reproducible images, dependency/image checks, infrastructure as code, release and rollback evidence |
+| Azure Solution Architect / AI Security Architect | Policy; Azure; Identity; Prod MCP | Customer requirements, threat model, architecture decisions, service/identity/network design, deployment tradeoffs, reliability and cost review |
+| Security Engineer | Domain; Policy; Workflow; Red Agent; Identity | Investigation lifecycle, findings/risk triage, evidence review, audit trail, server-enforced scope and approval checks |
+| Security/Infrastructure TPM / Infrastructure Program Manager | All | Dependencies, phase exit criteria, risks/ADRs, delivery milestones, operational metrics, pilot readiness and handoff |
+
+### Sandbox scope and trust boundaries
+
+The Microsoft technology intended here is **[Microsoft Execution Containers (MXC)](https://github.com/microsoft/mxc)**. Microsoft describes containment for tools, generated workloads, agent harnesses, or an entire agent in its [platform overview](https://blogs.windows.com/windowsdeveloper/2026/10/07/microsoft-execution-containers-policy-driven-containment-for-ai-agents/). MXC integration is planned. Select and pin a tested SDK/runtime and host/backend combination before implementation; backend capabilities differ. The current upstream SDK choices are Rust, .NET, and Node, so the Python application needs a reviewed adapter or local execution broker rather than an assumed Python SDK. Validate the current [API reference](https://github.com/microsoft/mxc/tree/main/docs/api-reference) and [backend guides](https://github.com/microsoft/mxc/tree/main/docs/backends) when implementing.
+
+The delivery target is the **whole Prohori capability operating in a reproducible sandbox environment**: React UI, FastAPI, deterministic workflow/LangGraph supervisor, Red Agent, Asset Context and Security Testing MCP services, disposable target lab, and evidence/audit/checkpoint stores. Include a remediation-and-reverification loop only through a separately approved, bounded capability if justified. A sandboxed worker alone does not satisfy this target.
+
+Use an isolated development/test environment as the outer envelope for that complete stack. Inside it, run agent harnesses and executable tool workloads through MXC where the selected backend can enforce the required controls. Keep UI/API, authorization/approval service, execution broker, and durable audit/checkpoint services in separate trust boundaries from untrusted agent/tool workers. The trusted services may live inside the outer environment; their policy, approval records, secrets, and audit data must not be writable by the agent sandbox. Do not assume MXC is a web-hosting platform or that every service must share one container. Phase 9 must document and prove which components run in MXC, which run as isolated services, and why.
+
+The execution path is UI → authenticated API → trusted policy/approval/budget checks → execution broker → MXC-contained workload → allowlisted lab target → validated evidence/audit results. UI visibility and disabled buttons support the operator; authorization is enforced again at the API, MCP, and execution boundaries. An agent never grants itself authorization.
+
+- **Foundation–Policy:** define the execution port, sandbox-run/result contracts, threat model, immutable policy source, approval binding, and default-deny filesystem/network rules. Reject unsupported controls; never silently fall back to host execution.
+- **Lab–MCP:** isolate the vulnerable target, give workers only the required lab access and per-run workspace, deny arbitrary commands/targets, and keep host credentials, container-engine sockets, and unrelated files unavailable. Translate named capabilities into fixed, validated execution requests.
+- **Workflow–Red Agent:** implement sandbox provision/start/execute/stop/deprovision, deadlines, resource/output limits, cancellation, emergency stop, bounded retries, and cleanup. Resume from trusted checkpoints; revalidate scope, approval expiry, and budget before another execution.
+- **Azure–Identity–Prod MCP:** provision the complete sandbox profile with infrastructure as code, restricted networking, operator/workload identity, a trusted secrets broker, monitoring, reset/teardown, and cost limits. Verify MXC host prerequisites in the selected Azure compute; do not assume a managed container host supports them. Keep a local reproducible profile and document any cloud blocker explicitly.
+- **Release evidence:** run an authorized end-to-end scenario from the UI through approval, contained validation, structured finding, and audit export; add denied file/egress access, policy tampering, forged/expired approval, prompt injection, timeout, worker crash, cancellation, and teardown tests. Each denial must be attributable to the expected enforcement layer. MXC audit mode disables containment and must not be used to run untrusted workloads or prove isolation.
+
+A phase is ready for completion only when its backend behavior, UI behavior, applicable sandbox controls, and acceptance evidence have been verified. UI acceptance includes loading/empty/error/unauthorized states, keyboard accessibility, and responsive layout. Integration tests must use the real authorization boundary; a mock success screen does not validate it. The final UI-12/HOH demo must show the full stack in the sandbox, an allowed action, a denied action, traceable evidence, and repeatable reset/cleanup.
+
 ## Responsible-use notice
 
 Use Prohori AI only in systems and environments for which you have explicit, documented authorization. Users are responsible for complying with all applicable laws, policies, rules of engagement, and contractual restrictions.
@@ -144,3 +183,12 @@ This project is licensed under the [MIT License](LICENSE).
 | 🟡 UI shell | ⚪ Scope |   |   |   |   |   |   |   |   | ⚪ Trace IDs |
 |   | ⚪ Auth |   |   |   |   |   |   |   |   | ⚪ Adv tests |
 |   | ⚪ Transitions |   |   |   |   |   |   |   |   |   |
+| ⚪ UI-03 shell | ⚪ UI-02 types | ⚪ UI-05 scope | ⚪ UI-12 lab | ⚪ UI-09 tools | ⚪ UI-06 API | ⚪ UI-09 graph | ⚪ UI-07 results | ⚪ UI-11 deploy | ⚪ UI-10 login | ⚪ UI-09 MCP |
+| ⚪ UI-04 demo | ⚪ State labels | ⚪ UI-08 gates | ⚪ Lab health | ⚪ Asset view | ⚪ UI-07 cases | ⚪ Live status | ⚪ UI-09 agent | ⚪ UI-12 pilot | ⚪ MSAL flow | ⚪ UI-11 E2E |
+| ⚪ Navigation | ⚪ API schemas | ⚪ Deny reasons | ⚪ Vuln/fix view | ⚪ Tool schemas | ⚪ Evidence view | ⚪ Approve pause | ⚪ Hypotheses | ⚪ Env status | ⚪ Role views | ⚪ UI-12 demo |
+| ⚪ A11y shell | ⚪ Parse errors | ⚪ Stop control | ⚪ Reset control | ⚪ Tool health | ⚪ Risk triage | ⚪ Resume view | ⚪ Proposals | ⚪ Trace viewer | ⚪ 401/403 UX | ⚪ Audit export |
+| ⚪ UI CI gates | ⚪ Type tests | ⚪ Gate tests | ⚪ Lab UI tests | ⚪ Asset tests | ⚪ API UI tests | ⚪ Resume tests | ⚪ Evidence tests | ⚪ UI smoke | ⚪ RBAC tests | ⚪ Full UI E2E |
+| ⚪ Exec port | ⚪ Run contract | ⚪ Sandbox rules | ⚪ MXC adapter | ⚪ Tool broker | ⚪ Contained run | ⚪ Worker bounds | ⚪ Agent sandbox | ⚪ Full sandbox | ⚪ Broker ID | ⚪ MCP sandbox |
+| ⚪ Host matrix | ⚪ Limit types | ⚪ Policy bind | ⚪ FS bounds | ⚪ Target egress | ⚪ Run budgets | ⚪ Kill/cleanup | ⚪ Scope checks | ⚪ Stack IaC | ⚪ Secret scope | ⚪ Policy tests |
+| ⚪ Pin runtime | ⚪ Result schema | ⚪ Deny fallback | ⚪ Net bounds | ⚪ Arg checks | ⚪ Trace IDs | ⚪ Safe resume | ⚪ Approval bind | ⚪ Reset/cost | ⚪ Access tests | ⚪ Tamper tests |
+| ⚪ Threat model | ⚪ Contract tests | ⚪ Deny tests | ⚪ Boundary tests | ⚪ Broker tests | ⚪ Stop tests | ⚪ Crash tests | ⚪ Agent tests | ⚪ Stack E2E | ⚪ Audit ID | ⚪ Handoff proof |
