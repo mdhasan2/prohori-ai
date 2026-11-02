@@ -26,13 +26,14 @@ The project is intended for authorized security testing, controlled laboratories
 ```text
 .
 ├── src/prohori_ai/
-│   ├── agents/red/       # Red Agent placeholders
+│   ├── agents/red/       # Red Agent ports, models, proposals (partial)
 │   ├── application/      # Application boundaries
 │   ├── config/           # Validated settings
 │   ├── domain/           # Investigation, evidence, risk, findings, approval, audit
 │   ├── infrastructure/   # Technology adapters
-│   ├── interfaces/       # API/CLI boundaries
+│   ├── interfaces/       # Local CLI prototype; API boundaries
 │   ├── mcp/assets/       # Asset Context MCP prototype
+│   ├── orchestration/    # Preliminary LangGraph supervisor
 │   └── policy/           # Scope, capabilities, authorization decisions
 ├── frontend/             # React + TypeScript demo shell (UI-01)
 ├── labs/path_traversal/  # Disposable local test lab
@@ -101,22 +102,34 @@ npm run build
 
 The GitHub Actions workflow currently runs **Python/backend checks only**; the frontend commands above are **not yet CI gates**.
 
+## Local CLI prototype (experimental)
+
+The November 1, 2026 local operator CLI is an **isolated, fixed-target demonstration**, not a general-purpose agent execution service. It permits only `GET /` against the local lab at `127.0.0.1:18080`; the operator must approve the investigation and a proposal-bound validation separately. The local runtime uses expiring SQLite approval records, policy checks before each request, an action budget, a STOP-file emergency check, audit events, and SQLite LangGraph checkpoints.
+
+With the local lab running on the configured loopback port:
+
+```bash
+uv run python -m prohori_ai.interfaces.cli
+# Resume a paused approval checkpoint:
+uv run python -m prohori_ai.interfaces.cli --resume <RUN_ID>
+# Run the mocked local CLI tests:
+uv run pytest tests/unit/interfaces/test_cli_slice.py
+```
+
+These tests mock the HTTP connection; a live end-to-end run, current CI result, arbitrary-crash recovery, MCP transport, and UI-to-backend integration are **not established**. The reusable supervisor graph remains a separate two-node prototype, and the `RedAgent` class is not invoked by the CLI. The `prohori-ai` package entrypoint still prints the application name.
+
 ## Next steps
 
-As of **October 26, 2026**, the latest audited `main` commit is [`40e610a`](https://github.com/mdhasan2/prohori-ai/commit/40e610a9815285ffea6b61786e244b7d06466213) (October 22). The [latest push-triggered backend CI run](https://github.com/mdhasan2/prohori-ai/actions/runs/39715642878) **passed** Ruff formatting, lint, mypy, and pytest. This does not validate frontend builds/tests or the unimplemented security workflows.
+As of **November 2, 2026**, the latest reviewed `main` commit is [`d62cb42`](https://github.com/mdhasan2/prohori-ai/commit/d62cb42c2f3e24b3ddc7d7427778776e936f23df) (November 1). It adds an approval-gated local CLI workflow, preliminary LangGraph and Red Agent code, and mocked tests. The existing [backend CI workflow](.github/workflows/ci.yml) runs Ruff, mypy, pytest, and coverage checks; its **result for this commit could not be independently verified**. The earlier [successful CI run](https://github.com/mdhasan2/prohori-ai/actions/runs/39715642878) does not validate the newest changes. Frontend CI checks remain absent.
 
-1. **Harden the authorization engine:** add negative tests for unknown tools, out-of-scope targets, missing approvals, emergency stop, destructive actions, and budget exhaustion. Bind approval to trusted, externally verified records—`AuthorizationRequest.human_approval_granted` is currently only a request-supplied Boolean.
-2. **Complete enforcement boundaries:** enforce the charter's scheme, service, host, port, path, and action scope where applicable; enforce capability budgets at execution time and add fail-closed integration tests. The existing engine makes a decision but does not execute or consume a budget.
-3. **Finish domain validation:** correct `FindingStatus.CONFIRMED = "confiremed"`, require timezone-aware approval expiry, define tested investigation state transitions, and add negative/serialization tests for domain models.
-4. **Complete the path traversal lab:** implement `read_file_remediated()` (currently `pass`) and prove allowed reads, blocked traversal, and vulnerable-only reproduction. Review Docker isolation: Compose binds to loopback but `lab_internal` currently has `internal: false`.
-5. **Improve MCP verification:** test the allowlist's returned payloads, authorization and relationship handling, and invalid-input behavior; the asset registry unit-test file is empty and the MCP integration test checks resource discovery only.
-6. **Extend frontend validation:** connect the demo shell to a **read-only, authenticated backend status endpoint** only after its contract and authorization boundary exist; add frontend lint, type-check, build, and Vitest checks to CI. Replace the template `frontend/README.md` when real setup guidance is ready.
-
-7. **Deliver UI work with each backend phase:** follow the [UI-01–UI-12 mapping](docs/implementation-details.md#ui-role-evidence-and-sandbox-delivery), adding typed contracts, Fluent UI views, real API integration, approval and workflow controls, Entra identity, accessibility, and end-to-end tests only as their server-side contracts become available.
-8. **Introduce the sandbox execution boundary:** define the adapter contract and threat model first, then build a pinned MXC integration with fail-closed backend checks and disposable lab execution. Keep policy and approval authority outside the agent's writable environment.
-9. **Prove the complete sandbox pilot:** deploy the UI, API, agents, MCP services, lab, and stores in an isolated environment; demonstrate allowed and denied execution, audit correlation, cancellation, reset, and customer handoff. Capture evidence against the [target-role matrix](docs/implementation-details.md#ui-role-evidence-and-sandbox-delivery).
-
-10. **Add independent agent observability:** deploy protected telemetry collection and audit storage outside agent control; correlate actions, routing/handoffs, MCP calls, and supported runtime activity in the UI. Verify provenance, redaction, audit-path failures, and resistance to telemetry tampering.
+1. **Verify current CI:** confirm Ruff, mypy, pytest, and the 80% coverage gate on `d62cb42`; fix failing steps and add the existing frontend lint, type-check, test, and build scripts to CI.
+2. **Harden and test the CLI boundary:** add negative cases for forged/stale approvals, exhausted budgets, retries, failure states, cancellation, restart/resume, concurrent runs, and immutable audit requirements; test the actual loopback lab separately from mocked HTTP.
+3. **Keep operator state out of Git:** remove the committed `.prohori-cli/checkpoints.sqlite` and `.prohori-cli/operator.sqlite` artifacts from version control, ignore local runtime stores, and assess whether any recorded data requires cleanup.
+4. **Complete reusable workflow and supervisor:** replace the two-node placeholder with domain-backed state transitions, typed API/service boundaries, independent operator approvals, durable checkpoints, bounded execution, and crash/replay tests. Do not expose request-controlled authorization remotely.
+5. **Complete Red Agent integration:** connect its observation, hypothesis, passive evidence, and proposal ports to trusted services; add missing hypothesis/findings/authorization tests and ensure the agent never approves its own actions. The current CLI uses a separate hardcoded path.
+6. **Fix domain and lab gaps:** correct `FindingStatus.CONFIRMED = "confiremed"`, enforce timezone-aware approval expiry, implement `read_file_remediated()`, test vulnerable-versus-remediated traversal, and verify Docker/network isolation.
+7. **Complete MCP and UI integration:** test actual MCP transport, asset data and authorization, and fixed-capability testing tools; connect the frontend only through an authenticated backend contract and server-enforced policy.
+8. **Defer production claims:** MXC containment, Azure identity/deployment, production MCP, and independent agent observability still need implementation, denial/tamper tests, and end-to-end evidence.
 
 [UI roadmap, target-role evidence, sandbox architecture, observability, and detailed statuses](docs/implementation-details.md).
 
@@ -137,11 +150,11 @@ This project is licensed under the [MIT License](LICENSE).
 
 ## Implementation grid
 
-Each column is a project phase; rows group core capability, UI, sandbox, and observability. Mixed groups are 🟡; [individual items retain their exact statuses](docs/implementation-details.md#detailed-implementation-status).
+Each column is a project phase; rows group core capability, UI, sandbox, and observability. 🟡 includes *partial*, local-only implementations—not completed phases. [Individual items and evidence limits](docs/implementation-details.md#detailed-implementation-status).
 
 | [**Foundation**](docs/implementation-details.md#foundation) | [**Domain**](docs/implementation-details.md#domain) | [**Policy**](docs/implementation-details.md#policy) | [**Lab**](docs/implementation-details.md#lab) | [**MCP**](docs/implementation-details.md#mcp) | [**Workflow**](docs/implementation-details.md#workflow) | [**Supervisor**](docs/implementation-details.md#supervisor) | [**Red Agent**](docs/implementation-details.md#red-agent) | [**Azure**](docs/implementation-details.md#azure) | [**Identity**](docs/implementation-details.md#identity) | [**Prod MCP**](docs/implementation-details.md#prod-mcp) |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 🟢 Tooling | 🟡 Models | 🟡 Policy | 🟡 Lab | 🟡 MCP | ⚪ Workflow | ⚪ Graph | ⚪ Red Agent | ⚪ Azure | ⚪ Identity | ⚪ Prod MCP |
+| 🟢 Tooling | 🟡 Models | 🟡 Policy | 🟡 Lab | 🟡 MCP | 🟡 CLI flow | 🟡 Graph | 🟡 Red Agent | ⚪ Azure | ⚪ Identity | ⚪ Prod MCP |
 | 🟡 UI shell | ⚪ UI types | ⚪ UI gates | ⚪ UI lab | ⚪ UI tools | ⚪ UI cases | ⚪ UI graph | ⚪ UI results | ⚪ UI deploy | ⚪ UI login | ⚪ UI MCP |
 | ⚪ Exec port | ⚪ Contracts | ⚪ Rules | ⚪ MXC lab | ⚪ Broker | ⚪ Runs | ⚪ Workers | ⚪ Agents | ⚪ Full stack | ⚪ Identity | ⚪ MCP bounds |
 | ⚪ Telemetry | ⚪ Events | ⚪ Decisions | ⚪ Host events | ⚪ MCP traces | ⚪ Actions | ⚪ Routes | ⚪ Agent traces | ⚪ Collector | ⚪ Log access | ⚪ Trace E2E |
