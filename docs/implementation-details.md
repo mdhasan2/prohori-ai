@@ -4,7 +4,7 @@
 
 ## UI, role evidence, and sandbox delivery
 
-The implementation grid keeps the existing eleven project phases. Each phase now includes its frontend, containment, and verification work; UI work is part of the end-to-end capability. **UI-01 is user-reported complete**, with a demo shell present in the repository; the grid retains its existing partial status for the broader UI foundation. All newly added items are **planned**, not implementation claims.
+The implementation grid keeps the existing eleven project phases. Each phase now includes its frontend, containment, and verification work; UI work is part of the end-to-end capability. **UI-01 is user-reported complete**, with a demo shell present in the repository; the grid retains its existing partial status for the broader UI foundation. The new UI, sandbox, and independent-observability items remain **planned** until verified. The November 1 local CLI and Red Agent commits provide partial **core** implementation evidence only.
 
 The UI roadmap remains: **UI-01** React/TypeScript setup; **UI-02** domain types; **UI-03** Fluent UI shell/navigation; **UI-04** dashboard/mock data; **UI-05** assets/scope/policy; **UI-06** FastAPI integration; **UI-07** investigations/findings/evidence; **UI-08** approvals/capabilities/emergency stop; **UI-09** supervisor/Red Agent/MCP; **UI-10** Entra/MSAL/RBAC; **UI-11** testing/security/Azure deployment; **UI-12** Microsoft HOH demonstration. These UI identifiers map across backend phases and do not change backend phase numbering. Mock views must be labeled; a rendered control is not evidence that its backend enforcement works.
 
@@ -54,7 +54,7 @@ This observability work supports the existing AI/Agentic Security, Cloud/Platfor
 
 ## Detailed implementation status
 
-This checklist preserves every non-empty item and its exact status from the previous README grid. The README groups these into Core, UI, Sandbox, and Observability; tests stay with their capability. A group is completed only when all its items are completed, planned when all are planned, blocked if any item is blocked, and otherwise in progress. Grouping does not change any item status. Update this checklist and the README summary together when implementation evidence changes.
+This checklist reflects a repository audit through November 2, 2026 (latest reviewed code commit `d62cb42`). The README groups these into Core, UI, Sandbox, and Observability; tests stay with their capability. A group is completed only when all its items are completed, planned when all are planned, blocked if any item is blocked, and otherwise in progress. Partial CLI evidence is not proof that the reusable domain, API, or production integrations are complete. Update this checklist and the README summary together when implementation evidence changes.
 
 ### Foundation
 
@@ -72,7 +72,7 @@ This checklist preserves every non-empty item and its exact status from the prev
 - 🟢 Hooks cfg
 - 🟢 Config
 - 🟢 CI cfg
-- 🟢 CI pass
+- 🟡 CI verify
 
 **UI**
 
@@ -270,17 +270,20 @@ This checklist preserves every non-empty item and its exact status from the prev
 
 ### Workflow
 
+The fixed-loopback operator CLI implements a *partial* workflow with two independent approval gates, policy checks before HTTP GET, SQLite audit events, and mocked tests. This is not the planned reusable application workflow or MCP transport.
+
+
 <details>
 <summary>Expand individual items and statuses</summary>
 
 **Core**
 
-- ⚪ State
-- ⚪ Execute
-- ⚪ Policy
-- ⚪ Evidence
-- ⚪ Audit
-- ⚪ Fail tests
+- 🟡 State
+- 🟡 Execute
+- 🟡 Policy
+- 🟡 Evidence
+- 🟡 Audit
+- 🟡 Fail tests
 
 **UI**
 
@@ -309,19 +312,22 @@ This checklist preserves every non-empty item and its exact status from the prev
 
 ### Supervisor
 
+The CLI includes a separate checkpointed LangGraph with approval interrupts, bounded retries, and resume logic. The reusable `orchestration/graph.py` supervisor still only wires observation and discovery; its remaining nodes and crash-recovery tests are incomplete.
+
+
 <details>
 <summary>Expand individual items and statuses</summary>
 
 **Core**
 
-- ⚪ Graph
-- ⚪ Routes
-- ⚪ Saves
-- ⚪ Pause
-- ⚪ Retries
-- ⚪ Timeouts
-- ⚪ Failures
-- ⚪ Resume
+- 🟡 Graph
+- 🟡 Routes
+- 🟡 Saves
+- 🟡 Pause
+- 🟡 Retries
+- 🟡 Timeouts
+- 🟡 Failures
+- 🟡 Resume
 
 **UI**
 
@@ -350,15 +356,18 @@ This checklist preserves every non-empty item and its exact status from the prev
 
 ### Red Agent
 
+Models, observation/evidence ports, proposal construction, and a thin `RedAgent` class now exist. The fixed-target CLI constructs its own hypothesis and proposal rather than calling that class. Red Agent authorization, full workflow tests, and findings integration remain unfinished.
+
+
 <details>
 <summary>Expand individual items and statuses</summary>
 
 **Core**
 
-- ⚪ Observe
-- ⚪ Theory
-- ⚪ Evidence
-- ⚪ Propose
+- 🟡 Observe
+- 🟡 Theory
+- 🟡 Evidence
+- 🟡 Propose
 - ⚪ Scope
 - ⚪ Approval
 - ⚪ Findings
