@@ -1,9 +1,13 @@
 :root {
-  font-family: "Segoe UI", system-ui, sans-serif;
-  color: #242424;
-  background: #f5f5f5;
+  font-family: Inter, system-ui, sans-serif;
+  color: #172033;
+  background: #f3f6fb;
   font-synthesis: none;
-  text-rendering: optimizeLegibility;
+  line-height: 1.5;
+
+  --surface: #ffffff;
+  --border: #c9d3e2;
+  --code: #eaf0f8;
 }
 
 * {
@@ -15,48 +19,118 @@ body {
 }
 
 main {
-  width: min(100% - 2rem, 72rem);
-  margin: 2rem auto;
+  max-width: 1050px;
+  margin: 0 auto;
+  padding: 24px;
 }
 
 header,
 section {
-  padding: 1.5rem;
-  margin-bottom: 1rem;
-  border: 1px solid #d1d1d1;
-  border-radius: 0.5rem;
-  background: #ffffff;
+  margin-bottom: 20px;
+}
+
+section {
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
 }
 
 h1,
-h2 {
+h2,
+h3 {
   line-height: 1.2;
 }
 
-p {
-  line-height: 1.6;
+button,
+input {
+  font: inherit;
+  padding: 10px 14px;
+  border-radius: 6px;
 }
 
-dl {
-  display: grid;
-  gap: 1rem;
+button {
+  margin: 6px 8px 6px 0;
+  border: 1px solid #2559a8;
+  background: #2559a8;
+  color: #ffffff;
+  cursor: pointer;
 }
 
-dt {
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+button.danger {
+  background: #b42332;
+  border-color: #b42332;
+}
+
+input {
+  width: 100%;
+  margin: 6px 0;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: inherit;
+}
+
+label {
+  display: block;
+  margin-top: 12px;
+}
+
+pre {
+  padding: 14px;
+  overflow: auto;
+  background: var(--code);
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+code {
+  overflow-wrap: anywhere;
+}
+
+li {
+  padding: 8px 0;
+}
+
+summary {
+  cursor: pointer;
+}
+
+[role='alert'] {
+  color: #a01525;
   font-weight: 600;
 }
 
-dd {
-  margin: 0.25rem 0 0;
+:focus-visible {
+  outline: 3px solid #e2a400;
+  outline-offset: 3px;
 }
 
-@media (max-width: 40rem) {
-  main {
-    margin-top: 1rem;
+@media (prefers-color-scheme: dark) {
+  :root {
+    color: #e7edf7;
+    background: #101827;
+
+    --surface: #182337;
+    --border: #43536b;
+    --code: #101827;
   }
 
-  header,
+  [role='alert'] {
+    color: #ffb1b9;
+  }
+}
+
+@media (max-width: 600px) {
+  main {
+    padding: 12px;
+  }
+
   section {
-    padding: 1rem;
+    padding: 14px;
   }
 }

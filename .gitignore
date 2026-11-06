@@ -37,3 +37,13 @@ dist/
 *.log
 logs/
 artifacts/
+
+.coverage
+coverage.xml
+htmlcov/
+.pytest_cache/
+.prohori-cli/
+var/*.db
+var/*.sqlite
+
+commit-review.txt

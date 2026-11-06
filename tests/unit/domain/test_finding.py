@@ -36,6 +36,7 @@ def test_create_finding(finding: Finding) -> None:
     assert finding.id == FINDING_ID
     assert finding.investigation_id == INVESTIGATION_ID
     assert finding.status is FindingStatus.CANDIDATE
+    assert finding.risk is not None
     assert finding.risk.score == 12
     assert finding.risk.severity is RiskSeverity.HIGH
     assert finding.evidence_ids == ()
