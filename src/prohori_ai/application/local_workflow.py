@@ -19,6 +19,7 @@ from prohori_ai.agents.red.models import (
     EvidenceRecord,
     HypothesisKind,
     SecurityHypothesis,
+    ValidationKind,
     ValidationProposal,
 )
 from prohori_ai.agents.red.proposals import propose_validation
@@ -37,8 +38,18 @@ from prohori_ai.policy.models import (
 )
 
 ASSET_ID = "lab-api"
-SCOPE_BINDING = "lab-api|http|127.0.0.1|18080|GET|/"
-HEADER = "content-security-policy"
+
+HOST = "127.0.0.1"
+PORT = 18080
+
+PUBLIC_PATH = "/files/readme.txt"
+
+TRAVERSAL_PATH = "/files/../private/proof.txt"
+
+PROOF_MARKER = "PROHORI_PATH_TRAVERSAL_PROOF"
+
+SCOPE_BINDING = f"{ASSET_ID}|http|{HOST}|{PORT}|GET|{PUBLIC_PATH}|validate:{TRAVERSAL_PATH}"
+
 MAX_ATTEMPTS = 2
 ACTION_LIMIT = 4
 
@@ -50,6 +61,11 @@ class State(TypedDict, total=False):
     evidence: list[dict[str, Any]]
     finding: dict[str, Any]
     error: str
+
+
+class HttpResult(TypedDict):
+    status: int
+    body: str
 
 
 def proposal_binding(proposal: ValidationProposal) -> str:
@@ -117,54 +133,152 @@ class Runtime:
     def stopped(self) -> bool:
         return (self.directory / "STOP").exists()
 
-    def get_headers(self, capability: str, binding: str = "") -> dict[str, str]:
-        """Only GET / on the fixed loopback lab; redirects are never followed."""
+    def get_path(
+        self,
+        capability: str,
+        path: str,
+        binding: str = "",
+    ) -> HttpResult:
+        """Perform one explicitly allowlisted local HTTP request."""
+
+        allowed_paths = {
+            "http_get": PUBLIC_PATH,
+            "active_validation": TRAVERSAL_PATH,
+        }
+
+        expected_path = allowed_paths.get(
+            capability,
+        )
+
+        if expected_path is None:
+            raise PermissionError("Capability has no HTTP path mapping")
+
+        if path != expected_path:
+            raise PermissionError("Path is not allowlisted for capability")
+
         deadline = monotonic() + 8
-        for attempt in range(1, MAX_ATTEMPTS + 1):
+
+        for attempt in range(
+            1,
+            MAX_ATTEMPTS + 1,
+        ):
             if self.stopped():
                 raise PermissionError("Emergency stop is active")
-            if not self.approved("investigation", SCOPE_BINDING):
+
+            if not self.approved(
+                "investigation",
+                SCOPE_BINDING,
+            ):
                 raise PermissionError("Investigation approval is missing or expired")
+
             consumed = int(
                 self.db.execute(
                     "SELECT COUNT(*) FROM audit WHERE run_id=? AND action='execution_intent'",
                     (self.run_id,),
                 ).fetchone()[0]
             )
+
             decision = self.engine.authorize(
                 request=AuthorizationRequest(
                     tool_name=capability,
-                    target="127.0.0.1",
-                    human_approval_granted=self.approved("validation", binding),
+                    target=HOST,
+                    human_approval_granted=(
+                        self.approved(
+                            "validation",
+                            binding,
+                        )
+                    ),
                 ),
                 scope=self.scope,
-                budget=ActionBudget(limit=ACTION_LIMIT, consumed=consumed),
-                emergency_stop=EmergencyStop(enabled=self.stopped()),
+                budget=ActionBudget(
+                    limit=ACTION_LIMIT,
+                    consumed=consumed,
+                ),
+                emergency_stop=EmergencyStop(
+                    enabled=self.stopped(),
+                ),
             )
-            self.audit("policy_decision", decision.model_dump(mode="json"))
+
+            self.audit(
+                "policy_decision",
+                decision.model_dump(
+                    mode="json",
+                ),
+            )
+
             if not decision.allowed:
                 raise PermissionError(decision.code.value)
+
             if monotonic() >= deadline:
                 raise TimeoutError("Tool deadline exceeded")
-            # This committed record also consumes one budget unit, including failed attempts.
-            self.audit("execution_intent", {"capability": capability, "attempt": attempt})
-            connection = http.client.HTTPConnection("127.0.0.1", 18080, timeout=3)
+
+            self.audit(
+                "execution_intent",
+                {
+                    "capability": capability,
+                    "path": path,
+                    "attempt": attempt,
+                },
+            )
+
+            connection = http.client.HTTPConnection(
+                HOST,
+                PORT,
+                timeout=3,
+            )
+
             try:
-                connection.request("GET", "/")
+                connection.request(
+                    "GET",
+                    path,
+                )
+
                 response = connection.getresponse()
-                if response.status != 200:
+
+                body = response.read().decode(
+                    "utf-8",
+                    errors="replace",
+                )
+
+                allowed_statuses = {200} if capability == "http_get" else {200, 403, 404}
+
+                if response.status not in allowed_statuses:
                     raise ValueError(
-                        f"Excepted 200; received {response.status}; no redirect followed"
+                        f"Unexpected HTTP status {response.status}: no redirect followed"
                     )
-                headers = {name.lower(): value for name, value in response.getheaders()}
-                self.audit("execution_result", {"capability": capability, "status": 200})
-                return headers
-            except (OSError, http.client.HTTPException) as exc:
-                self.audit("execution_error", {"type": type(exc).__name__, "attempt": attempt})
+
+                self.audit(
+                    "execution_result",
+                    {
+                        "capability": capability,
+                        "path": path,
+                        "status": response.status,
+                    },
+                )
+
+                return {
+                    "status": response.status,
+                    "body": body,
+                }
+
+            except (
+                OSError,
+                http.client.HTTPException,
+            ) as exc:
+                self.audit(
+                    "execution_error",
+                    {
+                        "type": type(exc).__name__,
+                        "attempt": attempt,
+                    },
+                )
+
                 if attempt == MAX_ATTEMPTS:
                     raise
+
             finally:
                 connection.close()
+
         raise RuntimeError("Unreachable retry state")
 
 
@@ -172,15 +286,31 @@ def build_graph(
     runtime: Runtime, saver: SqliteSaver
 ) -> CompiledStateGraph[State, None, State, State]:
     def gate(state: State, kind: str, binding: str) -> State:
+
+        if kind == "investigation":
+            operation = (
+                f"GET http://{HOST}:{PORT}"
+                f"{PUBLIC_PATH}; "
+                "passively inspect the public lab file endpoint"
+            )
+        else:
+            operation = (
+                f"GET http://{HOST}:{PORT}"
+                f"{TRAVERSAL_PATH}; "
+                "attempt one controlled path-traversal read "
+                "inside the diposable lab"
+            )
+
         interrupt(
             {
                 "gate": kind,
                 "binding": binding,
                 "asset_id": ASSET_ID,
-                "operation": "GET http://127.0.0.1:18080/; inspect Content-Security-Policy header",
+                "operation": operation,
                 "proposal": state.get("proposal"),
             }
         )
+
         # Resume payload is not authorization: consult the operator-owned record.
         allowed = runtime.approved(kind, binding) and not runtime.stopped()
         return {"status": "approved" if allowed else "cancelled"}
@@ -189,33 +319,75 @@ def build_graph(
         return gate(state, "investigation", SCOPE_BINDING)
 
     def red(state: State) -> State:
-        headers = runtime.get_headers("http_get")
-        if HEADER in headers:
-            return {"status": "completed", "evidence": []}
+        del state
+
+        response = runtime.get_path(
+            "http_get",
+            PUBLIC_PATH,
+        )
+
+        if response["status"] != 200:
+            raise ValueError("Public lab file was not readable")
+
         hypothesis = SecurityHypothesis(
             hypothesis_id=str(uuid4()),
             asset_id=ASSET_ID,
-            kind=HypothesisKind.MISSING_SECURITY_HEADER,
-            rationale="GET / returned no CSP header; validate before confirmation.",
+            kind=HypothesisKind.PATH_TRAVERSAL,
+            rationale=(
+                "The authorized file endpoint accepts a path "
+                "component and returned the expected public file. "
+                "A controlled active validation is required to "
+                "determine whether the public-directory boundary "
+                "can be escaped."
+            ),
         )
+
         evidence = EvidenceRecord(
             evidence_id=str(uuid4()),
             asset_id=ASSET_ID,
             hypothesis_id=hypothesis.hypothesis_id,
-            kind=EvidenceKind.PASSIVE_HTTP_METADATA,
-            source="http://127.0.0.1:18080/",
-            summary="Content-Security-Policy header absent in the initial response.",
+            kind=(EvidenceKind.PASSIVE_HTTP_METADATA),
+            source=(f"http://{HOST}:{PORT}{PUBLIC_PATH}"),
+            summary=(
+                "Authorized public file read succeeded. "
+                "No traversal was attempted during passive "
+                "evidence collection."
+            ),
             collected_at=datetime.now(UTC),
         )
-        proposal = propose_validation(hypothesis, (evidence,))
+
+        proposal = propose_validation(
+            hypothesis,
+            (evidence,),
+        )
+
         if proposal is None:
             raise ValueError("Evidence did not support a proposal")
-        runtime.audit("proposal_created", proposal.model_dump(mode="json"))
+
+        runtime.audit(
+            "proposal_created",
+            proposal.model_dump(
+                mode="json",
+            ),
+        )
+
         return {
             "status": "proposed",
-            "hypothesis": hypothesis.model_dump(mode="json"),
-            "evidence": [evidence.model_dump(mode="json")],
-            "proposal": proposal.model_dump(mode="json"),
+            "hypothesis": (
+                hypothesis.model_dump(
+                    mode="json",
+                )
+            ),
+            "evidence": [
+                evidence.model_dump(
+                    mode="json",
+                )
+            ],
+            "proposal": (
+                proposal.model_dump(
+                    mode="json",
+                )
+            ),
         }
 
     def validation_gate(state: State) -> State:
@@ -224,44 +396,97 @@ def build_graph(
 
     def validate(state: State) -> State:
         proposal = ValidationProposal.model_validate(state["proposal"])
+
         hypothesis = SecurityHypothesis.model_validate(state["hypothesis"])
+
         evidence = [EvidenceRecord.model_validate(item) for item in state["evidence"]]
 
         if (
             proposal.asset_id != ASSET_ID
             or hypothesis.asset_id != ASSET_ID
             or proposal.requested_capability != "active_validation"
+            or proposal.validation_kind is not ValidationKind.CHECK_PATH_TRAVERSAL
             or proposal.hypothesis_id != hypothesis.hypothesis_id
             or proposal.evidence_ids != tuple(item.evidence_id for item in evidence)
             or any(
-                item.asset_id != ASSET_ID or item.hypothesis_id != hypothesis.hypothesis_id
+                (item.asset_id != ASSET_ID or item.hypothesis_id != hypothesis.hypothesis_id)
                 for item in evidence
             )
         ):
             raise ValueError("Proposal/evidence binding rejected")
-        headers = runtime.get_headers("active_validation", proposal_binding(proposal))
-        missing = HEADER not in headers
+
+        response = runtime.get_path(
+            "active_validation",
+            TRAVERSAL_PATH,
+            proposal_binding(proposal),
+        )
+
+        traversal_succeeded = response["status"] == 200 and PROOF_MARKER in response["body"]
+
         active = EvidenceRecord(
             evidence_id=str(uuid4()),
             asset_id=ASSET_ID,
             hypothesis_id=hypothesis.hypothesis_id,
             kind=EvidenceKind.ACTIVE_VALIDATION,
-            source="http://127.0.0.1:18080/",
-            summary=f"Approved recheck: Content-Security-Policy absent={missing}",
+            source=(f"http://{HOST}:{PORT}{TRAVERSAL_PATH}"),
+            summary=(
+                "Approved path-traversal validation:"
+                f"status={response['status']}; "
+                "private proof observed="
+                f"{traversal_succeeded}"
+            ),
             collected_at=datetime.now(UTC),
         )
+
         finding = Finding(
             investigation_id=UUID(runtime.run_id),
-            title="Missing Content-Security-Policy header",
-            description="Local lab root response lacks CSP, Assess impact seperately.",
-            status=FindingStatus.CONFIRMED if missing else FindingStatus.REJECTED,
-            evidence_ids=tuple(UUID(item.evidence_id) for item in [*evidence, active]),
+            title=(
+                "Path traversal allows read outside "
+                "read the private proof outside the intended "
+                "public directory."
+            ),
+            description=(
+                "The approved local traversal validation "
+                "read the private proof outside the intended "
+                "public directory."
+                if traversal_succeeded
+                else (
+                    "The approved traversal request did not "
+                    "return the private proof. The diectory "
+                    "boundary prevented reproduction."
+                )
+            ),
+            status=(FindingStatus.CONFIRMED if traversal_succeeded else FindingStatus.REJECTED),
+            evidence_ids=tuple(
+                UUID(item.evidence_id)
+                for item in [
+                    *evidence,
+                    active,
+                ]
+            ),
         )
-        runtime.audit("finding_created", finding.model_dump(mode="json"))
+
+        runtime.audit(
+            "finding_created",
+            finding.model_dump(
+                mode="json",
+            ),
+        )
+
         return {
             "status": "completed",
-            "finding": finding.model_dump(mode="json"),
-            "evidence": [item.model_dump(mode="json") for item in [*evidence, active]],
+            "finding": finding.model_dump(
+                mode="json",
+            ),
+            "evidence": [
+                item.model_dump(
+                    mode="json",
+                )
+                for item in [
+                    *evidence,
+                    active,
+                ]
+            ],
         }
 
     def guarded(node: Callable[[State], State], state: State) -> State:

@@ -29,6 +29,7 @@ class ObservedAsset(BaseModel):
 class HypothesisKind(StrEnum):
     MISSING_SECURITY_HEADER = "missing_security_header"
     EXPOSED_DEBUG_METADATA = "exposed_debug_metadata"
+    PATH_TRAVERSAL = "path_traversal"
 
 
 class HypothesisStatus(StrEnum):
@@ -50,6 +51,7 @@ class SecurityHypothesis(BaseModel):
 
 class EvidenceKind(StrEnum):
     PASSIVE_HTTP_METADATA = "passive_http_metadata"
+    PASSIVE_HTTP_CONTENT = "passive_http_content"
     ACTIVE_VALIDATION = "active_validation"
 
 
@@ -67,6 +69,7 @@ class EvidenceRecord(BaseModel):
 
 class ValidationKind(StrEnum):
     CHECK_RESPONSE_HEADER = "check_response_header"
+    CHECK_PATH_TRAVERSAL = "check_path_traversal"
 
 
 class ValidationProposal(BaseModel):
