@@ -21,12 +21,11 @@ def read_file_vulnerable(file_path: str) -> str:
     """Read a file without enforcing the intended directory boundary."""
 
     candidate = PUBLIC_DIR / file_path
-    print(candidate)
 
     try:
-        content = candidate.read_text(encoding="utf-8")
-        print(content)
-        return content
+        return candidate.read_text(
+            encoding="utf-8",
+        )
     except FileNotFoundError as exc:
         raise HTTPException(
             status_code=404,
@@ -35,8 +34,26 @@ def read_file_vulnerable(file_path: str) -> str:
 
 
 def read_file_remediated(file_path: str) -> str:
-    """Read a file only if its resolved path remains inside PUBLIC_DIR."""
-    pass
+    """Read only files whose resolved path stays inside PUBLIC_DIR."""
+
+    public_root = PUBLIC_DIR.resolve()
+    candidate = (PUBLIC_DIR / file_path).resolve()
+
+    if not candidate.is_relative_to(public_root):
+        raise HTTPException(
+            status_code=403,
+            detail="Access denied",
+        )
+
+    try:
+        return candidate.read_text(
+            encoding="utf-8",
+        )
+    except FileNotFoundError as exc:
+        raise HTTPException(
+            status_code=404,
+            detail="File not found",
+        ) from exc
 
 
 def create_app(mode: LabMode) -> FastAPI:
@@ -79,8 +96,6 @@ def get_mode() -> LabMode:
         "LAB_MODE",
         LabMode.REMEDIATED.value,
     )
-
-    print(raw_mode)
 
     try:
         return LabMode(raw_mode)

@@ -76,7 +76,10 @@ packages = ["src/prohori_ai"]
 
 [tool.pytest.ini_options]
 minversion = "8.0"
-pythonpath = ["src"]
+pythonpath = [
+    "src",
+    ".",
+]
 testpaths = ["tests"]
 addopts = [
     "--import-mode=importlib",

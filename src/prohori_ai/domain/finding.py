@@ -10,7 +10,7 @@ from prohori_ai.domain.risk import RiskAssessment
 
 class FindingStatus(StrEnum):
     CANDIDATE = "candidate"
-    CONFIRMED = "confiremed"
+    CONFIRMED = "confirmed"
     REJECTED = "rejected"
     ACCEPTED_RISK = "accepted_risk"
     REMEDIATED = "remediated"
