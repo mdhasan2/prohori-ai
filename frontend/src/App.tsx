@@ -17,6 +17,7 @@ import type {
 import ApprovalPanel from './components/ApprovalPanel'
 import InvestigationResult from './components/InvestigationResult'
 import AuditTimeline from './components/AuditTimeline'
+import InventoryPanel from './components/InventoryPanel'
 
 const STORAGE_KEY = 'prohori:lastRunId'
 
@@ -183,6 +184,8 @@ export default function App() {
         <p>Operator identity: not configured.</p>
         {healthError && <p role="alert">{healthError}</p>}
       </header>
+
+      <InventoryPanel/>
 
       <section aria-label="Investigation controls">
         <button

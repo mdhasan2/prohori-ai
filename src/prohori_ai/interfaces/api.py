@@ -11,11 +11,13 @@ from starlette.middleware.base import RequestResponseEndpoint
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 from starlette.responses import Response
 
+from prohori_ai.application.inventory_service import InventoryService
 from prohori_ai.application.local_workflow_service import (
     LocalWorkflowService,
     RunNotFoundError,
     WorkflowConflictError,
 )
+from prohori_ai.domain.security_asset import SecurityAsset
 
 
 class StrictModel(BaseModel):
@@ -78,6 +80,7 @@ ERROR_RESPONSES: dict[int | str, dict[str, Any]] = {
 
 def create_app(directory: Path | None = None, allowed_origins: set[str] | None = None) -> FastAPI:
     service = LocalWorkflowService(directory)
+    inventory = InventoryService()
 
     origins = (
         allowed_origins
@@ -159,6 +162,22 @@ def create_app(directory: Path | None = None, allowed_origins: set[str] | None =
     )
     def health() -> HealthResponse:
         return HealthResponse()
+
+    @app.get(
+        "/api/assets",
+        response_model=list[SecurityAsset],
+        tags=["inventory"],
+        operation_id="listSecurityAssets",
+        responses={
+            403: {
+                "model": ErrorResponse,
+                "description": "The local access boundary rejected the request.",
+            },
+        },
+    )
+    def list_security_assets() -> list[SecurityAsset]:
+        """Read inventory without invoking investigaiton or target tools."""
+        return list(inventory.list_assets())
 
     @app.post(
         "/api/runs",
