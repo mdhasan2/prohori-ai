@@ -47,3 +47,23 @@ export interface HealthResponse {
 export interface StopResponse {
     stopped: boolean
 }
+
+export const ASSET_TYPES = [
+    'server',
+    'application',
+    'api',
+    'container',
+    'kubernetes_workload',
+    'cloud_resource',
+    'ai_agent',
+] as const
+
+export type AssetType = (typeof ASSET_TYPES)[number]
+
+export interface SecurityAsset {
+    asset_id: string
+    name: string
+    asset_type: AssetType
+    record_origin: 'synthetic'
+    verification_state: 'unverified'
+}

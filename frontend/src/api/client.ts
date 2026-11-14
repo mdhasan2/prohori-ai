@@ -4,7 +4,10 @@ import type {
     HealthResponse,
     RunResponse,
     StopResponse,
+    SecurityAsset,
 } from './types'
+
+import { ASSET_TYPES } from './types'
 
 export class ApiError extends Error {
     readonly status: number
@@ -108,4 +111,33 @@ export function getAudit(runId: string): Promise<AuditEvent[]> {
 
 export function activateStop(): Promise <StopResponse> {
     return post('/stop', {})
+}
+
+function isSecurityAsset(value: unknown): value is SecurityAsset {
+    if (typeof value !== 'object' || value === null) {
+        return false
+    }
+
+    const asset = value as Record<string, unknown>
+
+    return (
+        typeof asset.asset_id === 'string' &&
+        /^[a-z0-9][a-z0-9_-]{0,63}$/.test(asset.asset_id) &&
+        typeof asset.name === 'string' &&
+        asset.name.trim().length > 0 &&
+        asset.name.length <= 200 &&
+        ASSET_TYPES.some((type) => type === asset.asset_type) &&
+        asset.record_origin === 'synthetic' &&
+        asset.verification_state === 'unverified'
+    )
+}
+
+export async function getSecurityAssets(): Promise<SecurityAsset[]> {
+    const body = await request<unknown>('/assets')
+
+    if (!Array.isArray(body) || !body.every(isSecurityAsset)) {
+        throw new Error('Server returned an invalid inventory response.')
+    }
+
+    return body
 }
