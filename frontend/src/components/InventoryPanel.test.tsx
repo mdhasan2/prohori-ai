@@ -159,4 +159,21 @@ describe('InventoryPanel', ()=> {
         }
     })
 
+    it('rejects an asset ID begining with a hyphen', async () => {
+        fetchMock.mockResolvedValue(
+            jsonResponse([{ ...asset, asset_id: '-lab-api' }]),
+        )
+
+        render(<InventoryPanel />)
+        loadInventory()
+
+        expect(await screen.findByRole('alert')).toHaveTextContent(
+            'Server returned an invalid inventory response.',
+        )
+
+        expect(
+            screen.queryByRole('heading', { name: asset.name }),
+        ).not.toBeInTheDocument()
+    })
+
 })

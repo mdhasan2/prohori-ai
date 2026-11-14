@@ -64,6 +64,7 @@ def test_inventory_contract_and_no_execution(
         {"asset_type": "unsupported"},
         {"verification_state": "verified"},
         {"human_approval_granted": True},
+        {"asset_id": "-lab-api"},
     ],
 )
 def test_invalid_asset_contract_is_rejected(
