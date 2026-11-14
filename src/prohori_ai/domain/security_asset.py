@@ -24,7 +24,7 @@ class SecurityAsset(DomainModel):
     asset_id: str = Field(
         min_length=1,
         max_length=64,
-        pattern=r"^[a-z-0-9][a-z0-9_-]*$",
+        pattern=r"^[a-z0-9][a-z0-9_-]*$",
     )
     name: str = Field(min_length=1, max_length=200)
     asset_type: AssetType
