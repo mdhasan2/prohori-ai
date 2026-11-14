@@ -24,6 +24,7 @@ class StrictModel(BaseModel):
 
 class HealthResponse(StrictModel):
     status: Literal["ok"] = "ok"
+    access_mode: Literal["local_only"] = "local_only"
 
 
 class PendingApprovalResponse(StrictModel):
@@ -110,18 +111,26 @@ def create_app(directory: Path | None = None, allowed_origins: set[str] | None =
         request: Request,
         call_next: RequestResponseEndpoint,
     ) -> Response:
+        # This is the ASGI client address, not a browser-supplied header.
+        if request.client is None or request.client.host not in {
+            "127.0.0.1",
+            "::1",
+        }:
+            return JSONResponse(
+                status_code=403,
+                content={"detail": "Local operator access only."},
+            )
+
+        # Apply Origin checks to reads as well as mutations.
+        # Local non-browser clients may omit Origin.
+        origin = request.headers.get("origin")
+        if origin is not None and origin not in origins:
+            return JSONResponse(
+                status_code=403,
+                content={"detail": "Request origin is not allowed."},
+            )
+
         if request.method in {"POST", "PUT", "PATCH", "DELETE"}:
-            origin = request.headers.get("origin")
-
-            # Browser requests must originate from an explicitly allowed
-            # local operator UI. Non-browser clients may omit Origin.
-
-            if origin is not None and origin not in origins:
-                return JSONResponse(
-                    status_code=403,
-                    content={"detail": "Request origin is not allowed."},
-                )
-
             content_type = request.headers.get("content-type", "")
             media_type = content_type.split(";", 1)[0].strip().lower()
 
@@ -209,6 +218,12 @@ def create_app(directory: Path | None = None, allowed_origins: set[str] | None =
     )
     def activate_stop(body: StrictModel) -> StopResponse:
         return StopResponse.model_validate(service.activate_stop())
+
+    app.add_middleware(
+        TrustedHostMiddleware,
+        allowed_hosts=["127.0.0.1", "localhost"],
+        www_redirect=False,
+    )
 
     return app
 

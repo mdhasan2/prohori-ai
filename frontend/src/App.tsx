@@ -8,7 +8,11 @@ import {
   submitDecision,
 } from './api/client'
 
-import type {AuditEvent, RunResponse } from './api/types'
+import type {
+  AuditEvent,
+  HealthResponse,
+  RunResponse,
+ } from './api/types'
 
 import ApprovalPanel from './components/ApprovalPanel'
 import InvestigationResult from './components/InvestigationResult'
@@ -38,6 +42,9 @@ function saveRunId(id: string) {
 
 export default function App() {
   const [connection, setConnection] = useState('Checking')
+  const [accessMode, setAccessMode] = 
+  useState<HealthResponse['access_mode'] | null>(null)
+  const [healthError, setHealthError] = useState('')
   const [run, setRun] = useState<RunResponse | null>(null)
   const [runId, setRunId] = useState('')
   const [audit, setAudit] = useState<AuditEvent[]>([])
@@ -55,10 +62,19 @@ export default function App() {
 
     async function initialize() {
       try {
-        await getHealth()
-        if (active) setConnection('Connected')
-      } catch {
-        if (active) setConnection('Unavailable')
+        const health = await getHealth()
+
+        if (active) {
+          setConnection('Connected')
+          setAccessMode(health.access_mode)
+          setHealthError('')
+        }
+      } catch (cause) {
+        if (active) {
+          setConnection('Unavailable')
+          setAccessMode(null)
+          setHealthError(message(cause))
+        }
       }
       
       const id = savedRunId()
@@ -160,7 +176,12 @@ export default function App() {
       <header>
         <p>Prohori AI</p>
         <h1>Security Control Center</h1>
-        <p>Backend: {connection}</p>
+        <p role="status" aria-live="polite">
+          Backend: {connection}. API mode:{' '}
+          {accessMode === 'local_only' ? 'Local-only': 'Unconfirmed'}.
+        </p>
+        <p>Operator identity: not configured.</p>
+        {healthError && <p role="alert">{healthError}</p>}
       </header>
 
       <section aria-label="Investigation controls">
