@@ -67,8 +67,24 @@ function post<T>( path: string, body: unknown): Promise<T> {
     })
 }
 
-export function getHealth(): Promise<HealthResponse> {
-    return request('/health')
+export async function getHealth(): Promise<HealthResponse> {
+    const body = await request<unknown>('/health')
+
+    if(
+        typeof body !== 'object' ||
+        body === null ||
+        !('status' in body) ||
+        body.status !== 'ok' ||
+        !('access_mode' in body) ||
+        body.access_mode !== 'local_only'
+    ) {
+        throw new Error('Backend did not confirm local-only access.')
+    }
+
+    return {
+        status: 'ok',
+        access_mode: 'local_only',
+    }
 }
 
 export function createRun(): Promise<RunResponse> {
