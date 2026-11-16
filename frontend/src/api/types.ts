@@ -60,10 +60,22 @@ export const ASSET_TYPES = [
 
 export type AssetType = (typeof ASSET_TYPES)[number]
 
+export const ASSET_ENVIRONMENTS = [
+    'unknown',
+    'lab',
+    'development',
+    'staging',
+    'production',
+] as const
+
+export type AssetEnvironment = (typeof ASSET_ENVIRONMENTS)[number]
+
 export interface SecurityAsset {
     asset_id: string
     name: string
     asset_type: AssetType
+    owner_team: string | null
+    environment: AssetEnvironment
     record_origin: 'synthetic'
     verification_state: 'unverified'
 }

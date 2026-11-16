@@ -1,6 +1,10 @@
 """Read-only inventory service for the first console doemonstration."""
 
-from prohori_ai.domain.security_asset import AssetType, SecurityAsset
+from prohori_ai.domain.security_asset import (
+    AssetEnvironment,
+    AssetType,
+    SecurityAsset,
+)
 
 
 class InventoryService:
@@ -12,5 +16,7 @@ class InventoryService:
                 asset_id="lab-api",
                 name="Path-traversal lab API",
                 asset_type=AssetType.API,
+                owner_team=None,
+                environment=AssetEnvironment.LAB,
             ),
         )

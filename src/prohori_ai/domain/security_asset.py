@@ -18,6 +18,14 @@ class AssetType(StrEnum):
     AI_AGENT = "ai_agent"
 
 
+class AssetEnvironment(StrEnum):
+    UNKNOWN = "unknown"
+    LAB = "lab"
+    DEVELOPMENT = "development"
+    STAGING = "staging"
+    PRODUCTION = "production"
+
+
 class SecurityAsset(DomainModel):
     """An inventory record, not an execution authorization."""
 
@@ -28,6 +36,12 @@ class SecurityAsset(DomainModel):
     )
     name: str = Field(min_length=1, max_length=200)
     asset_type: AssetType
+    owner_team: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=120,
+    )
+    environment: AssetEnvironment = AssetEnvironment.UNKNOWN
 
     # This first implementaion accepts synthetic, unverified records only.
     record_origin: Literal["synthetic"] = "synthetic"
