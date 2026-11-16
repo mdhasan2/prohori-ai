@@ -12,6 +12,7 @@ const asset: SecurityAsset = {
     verification_state: 'unverified',
     owner_team: null,
     environment: 'lab',
+    data_classification: 'unknown',
 }
 
 const fetchMock = vi.fn<typeof fetch>()
@@ -67,6 +68,12 @@ describe('InventoryPanel', ()=> {
 
         expect(
             screen.getByText('Environment: Lab')
+        ).toBeInTheDocument()
+
+        expect(
+            screen.getByText(
+                'Data classification: Unknown (not recorded)',
+            ),
         ).toBeInTheDocument()
 
         expect(fetchMock).toHaveBeenCalledWith(
@@ -235,6 +242,11 @@ describe('InventoryPanel', ()=> {
         { environment: null },
         { owner_team: undefined },
         { environment: undefined },
+        { data_classification: '' },
+        { data_classification: 'secret' },
+        { data_classification: null },
+        { data_classification: 42 },
+        { data_classification: undefined },
     ])('rejects invalid metadata: %j', async (overrides) => {
         fetchMock.mockResolvedValue(
             jsonResponse([{ ...asset, ...overrides }]),
@@ -252,4 +264,35 @@ describe('InventoryPanel', ()=> {
         ).not.toBeInTheDocument()
     })
 
+    it.each([
+        ['public', 'Public'],
+        ['internal', 'Internal'],
+        ['confidential', 'Confidential'],
+        ['restricted', 'Restricted'],
+    ])(
+        'displays classification %s without implying verification',
+        async (classification, label) => {
+            fetchMock.mockResolvedValue(
+                jsonResponse([
+                    { ...asset, data_classification: classification },
+                ]),
+            )
+            render(<InventoryPanel />)
+            loadInventory()
+
+            expect(
+                await screen.findByText(
+                    `Data classification: ${label}`,
+                ),
+            ).toBeInTheDocument()
+
+            expect(
+                screen.getByText('Synthetic demo record'),
+            ).toBeInTheDocument()
+
+            expect(
+                screen.getByText('Verification: unverified'),
+            ).toBeInTheDocument()
+        },
+    )
 })
