@@ -26,6 +26,14 @@ class AssetEnvironment(StrEnum):
     PRODUCTION = "production"
 
 
+class DataClassification(StrEnum):
+    UNKNOWN = "unknown"
+    PUBLIC = "public"
+    INTERNAL = "internal"
+    CONFIDENTIAL = "confidential"
+    RESTRICTED = "restricted"
+
+
 class SecurityAsset(DomainModel):
     """An inventory record, not an execution authorization."""
 
@@ -42,6 +50,7 @@ class SecurityAsset(DomainModel):
         max_length=120,
     )
     environment: AssetEnvironment = AssetEnvironment.UNKNOWN
+    data_classification: DataClassification = DataClassification.UNKNOWN
 
     # This first implementaion accepts synthetic, unverified records only.
     record_origin: Literal["synthetic"] = "synthetic"

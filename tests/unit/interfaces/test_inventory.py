@@ -19,6 +19,7 @@ ASSET_PAYLOAD: dict[str, object] = {
     "verification_state": "unverified",
     "owner_team": None,
     "environment": "lab",
+    "data_classification": "unknown",
 }
 
 
@@ -73,6 +74,10 @@ def test_inventory_contract_and_no_execution(
         {"owner_team": 42},
         {"environment": "internet"},
         {"environment": None},
+        {"data_classification": ""},
+        {"data_classification": "secret"},
+        {"data_classification": None},
+        {"data_classification": 42},
     ],
 )
 def test_invalid_asset_contract_is_rejected(
@@ -124,6 +129,15 @@ def test_inventory_is_documented_in_openapi(client: TestClient) -> None:
     properties = schema["components"]["schemas"]["SecurityAsset"]["properties"]
     assert properties["verification_state"]["const"] == "unverified"
 
+    assert properties["data_classification"]["default"] == "unknown"
+    assert schema["components"]["schemas"]["DataClassification"]["enum"] == [
+        "unknown",
+        "public",
+        "internal",
+        "confidential",
+        "restricted",
+    ]
+
 
 def test_missing_metadata_stays_unknown() -> None:
     asset = SecurityAsset.model_validate(
@@ -136,6 +150,8 @@ def test_missing_metadata_stays_unknown() -> None:
     serialized = asset.model_dump(mode="json")
     assert serialized["owner_team"] is None
     assert serialized["environment"] == "unknown"
+    assert asset.data_classification.value == "unknown"
+    assert serialized["data_classification"] == "unknown"
 
 
 def test_known_metadata_does_not_change_verification() -> None:
@@ -149,5 +165,22 @@ def test_known_metadata_does_not_change_verification() -> None:
 
     assert asset.owner_team == "Demo Platform Team"
     assert asset.environment.value == "production"
+    assert asset.record_origin == "synthetic"
+    assert asset.verification_state == "unverified"
+
+
+@pytest.mark.parametrize(
+    "classification",
+    ["unknown", "public", "internal", "confidential", "restricted"],
+)
+def test_classificaiton_does_not_grant_verification(classification: str) -> None:
+    asset = SecurityAsset.model_validate(
+        {
+            **ASSET_PAYLOAD,
+            "data_classification": classification,
+        }
+    )
+
+    assert asset.model_dump(mode="json")["data_classification"] == classification
     assert asset.record_origin == "synthetic"
     assert asset.verification_state == "unverified"

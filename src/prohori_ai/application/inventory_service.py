@@ -3,6 +3,7 @@
 from prohori_ai.domain.security_asset import (
     AssetEnvironment,
     AssetType,
+    DataClassification,
     SecurityAsset,
 )
 
@@ -18,5 +19,6 @@ class InventoryService:
                 asset_type=AssetType.API,
                 owner_team=None,
                 environment=AssetEnvironment.LAB,
+                data_classification=DataClassification.UNKNOWN,
             ),
         )
