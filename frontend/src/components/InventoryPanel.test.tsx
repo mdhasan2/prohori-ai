@@ -10,6 +10,8 @@ const asset: SecurityAsset = {
     asset_type: 'api',
     record_origin: 'synthetic',
     verification_state: 'unverified',
+    owner_team: null,
+    environment: 'lab',
 }
 
 const fetchMock = vi.fn<typeof fetch>()
@@ -58,6 +60,14 @@ describe('InventoryPanel', ()=> {
 
         expect(screen.getByText('Synthetic demo record')).toBeInTheDocument()
         expect(screen.getByText('Verification: unverified')).toBeInTheDocument()
+
+        expect(
+            screen.getByText('Owner team: Unknown (not recorded)'),
+        ).toBeInTheDocument()
+
+        expect(
+            screen.getByText('Environment: Lab')
+        ).toBeInTheDocument()
 
         expect(fetchMock).toHaveBeenCalledWith(
             '/api/assets',
@@ -162,6 +172,72 @@ describe('InventoryPanel', ()=> {
     it('rejects an asset ID begining with a hyphen', async () => {
         fetchMock.mockResolvedValue(
             jsonResponse([{ ...asset, asset_id: '-lab-api' }]),
+        )
+
+        render(<InventoryPanel />)
+        loadInventory()
+
+        expect(await screen.findByRole('alert')).toHaveTextContent(
+            'Server returned an invalid inventory response.',
+        )
+
+        expect(
+            screen.queryByRole('heading', { name: asset.name }),
+        ).not.toBeInTheDocument()
+    })
+
+    it('displays a recorded owner and environment', async () => {
+        fetchMock.mockResolvedValue(
+            jsonResponse([
+                {
+                    ...asset,
+                    owner_team: 'Demo Platform Team',
+                    environment: 'production',
+                },
+            ]),
+        )
+
+        render(<InventoryPanel />)
+        loadInventory()
+
+        expect(
+            await screen.findByText('Owner team: Demo Platform Team'),
+        ).toBeInTheDocument()
+
+        expect(
+            screen.getByText('Environment: Production'),
+        ).toBeInTheDocument()
+
+        expect(
+            screen.getByText('Verification: unverified'),
+        ).toBeInTheDocument()
+    })
+
+    it('displays an unknown environment explicitly', async () => {
+        fetchMock.mockResolvedValue(
+            jsonResponse([{ ...asset, environment: 'unknown' }]),
+        )
+
+        render(<InventoryPanel />)
+        loadInventory()
+
+        expect(
+            await screen.findByText('Environment: Unknown'),
+        ).toBeInTheDocument()
+    })
+
+    it.each([
+        { owner_team: '' },
+        { owner_team: '   ' },
+        { owner_team: 42 },
+        { owner_team: 'x'.repeat(121) },
+        { environment: 'internet' },
+        { environment: null },
+        { owner_team: undefined },
+        { environment: undefined },
+    ])('rejects invalid metadata: %j', async (overrides) => {
+        fetchMock.mockResolvedValue(
+            jsonResponse([{ ...asset, ...overrides }]),
         )
 
         render(<InventoryPanel />)

@@ -7,7 +7,7 @@ import type {
     SecurityAsset,
 } from './types'
 
-import { ASSET_TYPES } from './types'
+import { ASSET_ENVIRONMENTS, ASSET_TYPES } from './types'
 
 export class ApiError extends Error {
     readonly status: number
@@ -120,6 +120,14 @@ function isSecurityAsset(value: unknown): value is SecurityAsset {
 
     const asset = value as Record<string, unknown>
 
+    const ownerIsValid =
+        asset.owner_team === null ||
+        (
+            typeof asset.owner_team === 'string' &&
+            asset.owner_team.trim().length > 0 &&
+            asset.owner_team.length <= 120
+        )
+
     return (
         typeof asset.asset_id === 'string' &&
         /^[a-z0-9][a-z0-9_-]{0,63}$/.test(asset.asset_id) &&
@@ -127,6 +135,10 @@ function isSecurityAsset(value: unknown): value is SecurityAsset {
         asset.name.trim().length > 0 &&
         asset.name.length <= 200 &&
         ASSET_TYPES.some((type) => type === asset.asset_type) &&
+        ownerIsValid &&
+        ASSET_ENVIRONMENTS.some(
+            (environment) => environment === asset.environment,
+        ) &&
         asset.record_origin === 'synthetic' &&
         asset.verification_state === 'unverified'
     )

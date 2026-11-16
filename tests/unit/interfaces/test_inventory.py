@@ -17,6 +17,8 @@ ASSET_PAYLOAD: dict[str, object] = {
     "asset_type": "api",
     "record_origin": "synthetic",
     "verification_state": "unverified",
+    "owner_team": None,
+    "environment": "lab",
 }
 
 
@@ -65,6 +67,12 @@ def test_inventory_contract_and_no_execution(
         {"verification_state": "verified"},
         {"human_approval_granted": True},
         {"asset_id": "-lab-api"},
+        {"owner_team": ""},
+        {"owner_team": "  "},
+        {"owner_team": "x" * 121},
+        {"owner_team": 42},
+        {"environment": "internet"},
+        {"environment": None},
     ],
 )
 def test_invalid_asset_contract_is_rejected(
@@ -115,3 +123,31 @@ def test_inventory_is_documented_in_openapi(client: TestClient) -> None:
 
     properties = schema["components"]["schemas"]["SecurityAsset"]["properties"]
     assert properties["verification_state"]["const"] == "unverified"
+
+
+def test_missing_metadata_stays_unknown() -> None:
+    asset = SecurityAsset.model_validate(
+        {"asset_id": "unclassified-api", "name": "Unclassified demo API", "asset_type": "api"}
+    )
+
+    assert asset.owner_team is None
+    assert asset.environment.value == "unknown"
+
+    serialized = asset.model_dump(mode="json")
+    assert serialized["owner_team"] is None
+    assert serialized["environment"] == "unknown"
+
+
+def test_known_metadata_does_not_change_verification() -> None:
+    asset = SecurityAsset.model_validate(
+        {
+            **ASSET_PAYLOAD,
+            "owner_team": "  Demo Platform Team  ",
+            "environment": "production",
+        }
+    )
+
+    assert asset.owner_team == "Demo Platform Team"
+    assert asset.environment.value == "production"
+    assert asset.record_origin == "synthetic"
+    assert asset.verification_state == "unverified"

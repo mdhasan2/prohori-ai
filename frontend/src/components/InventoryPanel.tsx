@@ -1,6 +1,14 @@
 import { useState } from "react"
 import { getSecurityAssets } from "../api/client"
-import type { SecurityAsset } from "../api/types"
+import type { AssetEnvironment, SecurityAsset } from "../api/types"
+
+const ENVIRONMENT_LABELS: Record<AssetEnvironment, string> = {
+    unknown: 'Unknown',
+    lab: 'Lab',
+    development: 'Development',
+    staging: 'Staging',
+    production: 'Production',
+}
 
 type InventoryState =
     | { status: 'idle' }
@@ -75,6 +83,14 @@ export default function InventoryPanel() {
                                         Asset ID: <code>{asset.asset_id}</code>
                                     </p>
                                     <p>Type: {asset.asset_type}</p>
+                                    <p>
+                                        Owner team: {' '}
+                                        {asset.owner_team ?? 'Unknown (not recorded)'}
+                                    </p>
+                                    <p>
+                                        Environment: {' '}
+                                        {ENVIRONMENT_LABELS[asset.environment]}
+                                    </p>
                                     <p>
                                         <strong>Synthetic demo record</strong>
                                     </p>
