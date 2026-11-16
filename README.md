@@ -27,9 +27,9 @@ The project is intended for authorized security testing, controlled laboratories
 .
 ├── src/prohori_ai/
 │   ├── agents/red/       # Red Agent ports, models, proposals (partial)
-│   ├── application/      # Shared local workflow and operator service
+│   ├── application/      # Local workflow, operator and inventory services
 │   ├── config/           # Validated settings
-│   ├── domain/           # Investigation, evidence, risk, findings, approval, audit
+│   ├── domain/           # Investigations, assets, evidence, findings, approvals
 │   ├── infrastructure/   # Technology adapters
 │   ├── interfaces/       # CLI and FastAPI operator endpoints
 │   ├── mcp/assets/       # Asset Context MCP prototype
@@ -87,9 +87,13 @@ uv run pre-commit run --all-files
 
 ## Local operator UI and API (experimental)
 
-The React + TypeScript/Vite frontend now connects to a **local FastAPI workflow API** through Vite's `/api` proxy. The UI supports starting and reopening runs, investigation/validation approve-or-reject decisions, evidence and findings, an audit timeline, and an emergency-stop request. The API exposes `GET /api/health`, `POST /api/runs`, `GET /api/runs/{run_id}`, `POST /api/runs/{run_id}/decision`, `GET /api/runs/{run_id}/audit`, and `POST /api/stop`; FastAPI's OpenAPI contract is at `/openapi.json` (interactive `/docs`).
+The React + TypeScript/Vite frontend connects to a **local FastAPI workflow API** through Vite's `/api` proxy. It supports starting/reopening runs, two investigation/validation approval gates, results, findings, an audit timeline and emergency stop. The console now has a **read-only asset inventory** (`GET /api/assets`), currently returning **one synthetic, unverified lab API record** (`lab-api`) with owner unknown and environment `lab`. Loading the inventory does not scan a target, authorize actions, or discover real enterprise assets. Both API and UI validate its typed fields.
 
-**Local demonstration only.** There is **no operator login, Entra identity, or RBAC**. Origin/content-type checks do not establish caller identity; non-browser clients may omit Origin. Keep API and Vite on `127.0.0.1`, use **one API worker**, and never expose the service to untrusted networks. The only HTTP tool target is `GET http://127.0.0.1:18080/` for a Content-Security-Policy header check—not the lab's vulnerable/remediated file-read route. The reusable supervisor and Red Agent are not wired into this UI. A fully integrated live UI-to-lab run is not yet independently verified.
+API endpoints: `GET /api/health`, `GET /api/assets`, `POST /api/runs`, `GET /api/runs/{run_id}`, `POST /api/runs/{run_id}/decision`, `GET /api/runs/{run_id}/audit`, and `POST /api/stop`. FastAPI serves the OpenAPI schema at `/openapi.json` and interactive documentation at `/docs`.
+
+**Local demo only.** There is **no verified operator identity, login, Entra integration or RBAC**. The API now rejects non-loopback ASGI peers, disallowed Origin headers (including reads), invalid Host headers and non-JSON mutations. These are **local-access restrictions, not authentication**; non-browser clients on loopback may omit Origin. Bind API/Vite to `127.0.0.1`, use **one API worker**, and do not expose to untrusted networks.
+
+The fixed workflow makes only two allowlisted lab requests: `GET http://127.0.0.1:18080/files/readme.txt` (after investigation approval), followed by a bounded `GET http://127.0.0.1:18080/files/../private/proof.txt` (after separately bound validation approval). Evidence and a finding are recorded; this is not a general-purpose scanner. **UI mismatch:** the investigation panel still displays a CSP-header check and the lab root URL, although the backend now uses the file-read/path-traversal scenario. The reusable supervisor and general Red Agent are not integrated into this UI. A live end-to-end browser-to-container execution is not independently verified by repository tests.
 
 Run from the repository root in **three separate terminals** (requires Docker for the lab, Node.js/npm for the frontend):
 
@@ -100,6 +104,8 @@ cd labs/path_traversal
 docker compose up --build -d
 curl http://127.0.0.1:18080/health
 ```
+
+The lab defaults to `LAB_MODE=remediated`. Its remediated reader now enforces resolved-path containment, with Python unit tests for public reads, traversal, and absolute-path escapes. These tests do **not** establish Docker isolation or resistance to filesystem races. For a disposable, loopback-only vulnerable demonstration, run `LAB_MODE=vulnerable docker compose up --build -d` from the lab directory; afterward restore the fixed mode with `LAB_MODE=remediated docker compose up --build -d`.
 
 **Terminal 2 — API:**
 
@@ -143,16 +149,17 @@ These tests mock HTTP; they do not prove an end-to-end live run or containment. 
 
 ## Next steps
 
-**Audit baseline — November 9, 2026:** latest reviewed `main` implementation commit [`c15d2e6`](https://github.com/mdhasan2/prohori-ai/commit/c15d2e64eacb39d2daf14837660dd6406291e9df) (November 6). Its [GitHub Actions backend CI run](https://github.com/mdhasan2/prohori-ai/actions/runs/42242595390) **passed** uv lock checks, Ruff, mypy, and pytest (including the configured 80% coverage gate). The workflow does **not** execute frontend lint/typecheck/Vitest/build; this success does not prove UI or end-to-end behavior.
+**Audit baseline — November 16, 2026:** reviewed [`7f70297`](https://github.com/mdhasan2/prohori-ai/commit/7f7029797dae2c15332bebf9990e3ead82ed939c) on `main`. [Backend CI](https://github.com/mdhasan2/prohori-ai/actions/runs/43800364403) **passed** locked dependency, Ruff, mypy, and pytest checks. Frontend lint/typecheck/Vitest/build and a live browser-to-lab run are **not** part of that workflow. A [separate Dependabot frontend update](https://github.com/mdhasan2/prohori-ai/actions/runs/43676799539) failed November 15; it is not a failure of the main backend CI run.
 
-1. **Test the API/UI boundaries:** expand `tests/unit/interfaces/test_api.py` beyond health; cover creating/opening runs, correct/wrong/expired approval bindings, rejection, persisted audit, emergency stop, and errors. Add UI tests for loading, denied/failed actions, refresh, resume, and audit; add frontend quality gates to CI.
-2. **Secure operator approval:** add real API authentication and authorization, binding approvals to independently verified human identity; test non-browser requests, forged decisions, request replay, and origin bypass. Continue loopback-only operation until implemented.
-3. **Harden durable workflow execution:** add interprocess-safe coordination, idempotency, atomic approval/audit/checkpoint handling, crash/restart tests, and clearly defined cancellation semantics.
-4. **Finish lab and domain gaps:** implement/test `read_file_remediated()`, verify path traversal isolation (`lab_internal.internal: false` currently), correct `FindingStatus.CONFIRMED = "confiremed"`, and validate timezone-aware approval expiry.
-5. **Integrate the reusable supervisor and Red Agent:** replace stubbed transitions with real workflow nodes; add failures, retries, checkpoints, denied-approval/replay tests and evidence provenance. Agent-supplied state must never grant authorization.
-6. **Finish MCP and sandbox work:** exercise MCP transport, validated fixed-capability tools, server-side scope/approval checks, denied-input tests, and independently verified sandbox restrictions before any production claims.
+1. **Correct UI scenario labels:** replace the old CSP-header/root-URL text with actual path-traversal investigation/validation steps; render lab mode, reproduced/blocked outcomes, and trustworthy evidence.
+2. **Demonstrate both lab modes end to end:** add browser/API → investigation approval → passive read → validation approval → vulnerable/remediated finding → audit tests, covering rejection, expiry, stop, restart, and failures. Existing tests use mocked HTTP or direct reader calls.
+3. **Extend the inventory responsibly:** keep synthetic/unverified provenance, add asset selection and relationships, and implement bounded discovery only behind explicit scope and authorization. Inventory is not permission to execute.
+4. **Secure operator decisions:** implement authenticated caller identity and RBAC, bind approvals to independently verified humans, and test forged/replayed local-client decisions before any non-loopback access.
+5. **Harden execution and isolation:** address interprocess coordination, approval/checkpoint atomicity, idempotency, crash recovery, filesystem races, Docker's `internal: false` network, and cancellation/stop semantics.
+6. **Integrate supervisor, Red Agent and MCP:** route execution through trusted capability, scope, approval and budget enforcement; add denial, injection and evidence-provenance tests.
+7. **Add frontend CI and review dependencies:** run `npm ci`, lint, typecheck, Vitest and build on PRs; investigate the separate failed Dependabot update without weakening backend gates.
 
-[UI roadmap, role evidence, sandbox design, observability, and historical implementation checklist](docs/implementation-details.md).
+[Detailed checklist (last audited November 2; may lag current implementation)](docs/implementation-details.md#detailed-implementation-status) · [Sandbox/observability/UI roadmap](docs/implementation-details.md).
 
 ## Responsible-use notice
 
@@ -171,11 +178,11 @@ This project is licensed under the [MIT License](LICENSE).
 
 ## Implementation grid
 
-Each column is one project phase; rows summarize core capability, UI, sandbox, and observability. 🟡 indicates partial/local-only work—not a completed phase. [Detailed checklist (last audited November 2)](docs/implementation-details.md#detailed-implementation-status).
+Each column is one project phase; rows summarize core capability, UI, sandbox, and independent observability. 🟡 means partial/local-only work, not a completed phase. [Detailed checklist (November 2 baseline)](docs/implementation-details.md#detailed-implementation-status).
 
 | [**Foundation**](docs/implementation-details.md#foundation) | [**Domain**](docs/implementation-details.md#domain) | [**Policy**](docs/implementation-details.md#policy) | [**Lab**](docs/implementation-details.md#lab) | [**MCP**](docs/implementation-details.md#mcp) | [**Workflow**](docs/implementation-details.md#workflow) | [**Supervisor**](docs/implementation-details.md#supervisor) | [**Red Agent**](docs/implementation-details.md#red-agent) | [**Azure**](docs/implementation-details.md#azure) | [**Identity**](docs/implementation-details.md#identity) | [**Prod MCP**](docs/implementation-details.md#prod-mcp) |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 🟢 Tooling | 🟡 Models | 🟡 Policy | 🟡 Lab | 🟡 MCP | 🟡 Local flow | 🟡 Graph | 🟡 Red Agent | ⚪ Azure | ⚪ Identity | ⚪ Prod MCP |
-| 🟡 UI local | 🟡 UI types | 🟡 UI gates | ⚪ UI lab | ⚪ UI tools | 🟡 UI runs | 🟡 UI status | 🟡 UI results | ⚪ UI deploy | ⚪ UI login | ⚪ UI MCP |
+| 🟡 UI local | 🟡 UI assets | 🟡 UI gates | 🟡 UI lab | ⚪ UI tools | 🟡 UI runs | 🟡 UI status | 🟡 UI results | ⚪ UI deploy | ⚪ UI login | ⚪ UI MCP |
 | ⚪ Exec port | ⚪ Contracts | ⚪ Rules | ⚪ MXC lab | ⚪ Broker | ⚪ Runs | ⚪ Workers | ⚪ Agents | ⚪ Full stack | ⚪ Identity | ⚪ MCP bounds |
 | ⚪ Telemetry | ⚪ Events | ⚪ Decisions | ⚪ Host events | ⚪ MCP traces | ⚪ Actions | ⚪ Routes | ⚪ Agent traces | ⚪ Collector | ⚪ Log access | ⚪ Trace E2E |

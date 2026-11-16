@@ -1,6 +1,10 @@
 import { useState } from "react"
 import { getSecurityAssets } from "../api/client"
-import type { AssetEnvironment, SecurityAsset } from "../api/types"
+import type {
+    AssetEnvironment,
+    DataClassification,
+    SecurityAsset,
+} from '../api/types'
 
 const ENVIRONMENT_LABELS: Record<AssetEnvironment, string> = {
     unknown: 'Unknown',
@@ -8,6 +12,14 @@ const ENVIRONMENT_LABELS: Record<AssetEnvironment, string> = {
     development: 'Development',
     staging: 'Staging',
     production: 'Production',
+}
+
+const CLASSIFICATION_LABELS: Record<DataClassification, string> = {
+    unknown: 'Unknown (not recorded)',
+    public: 'Public',
+    internal: 'Internal',
+    confidential: 'Confidential',
+    restricted: 'Restricted',
 }
 
 type InventoryState =
@@ -90,6 +102,12 @@ export default function InventoryPanel() {
                                     <p>
                                         Environment: {' '}
                                         {ENVIRONMENT_LABELS[asset.environment]}
+                                    </p>
+                                    <p>
+                                        Data classification: {' '}
+                                        {CLASSIFICATION_LABELS[
+                                            asset.data_classification
+                                        ]}
                                     </p>
                                     <p>
                                         <strong>Synthetic demo record</strong>

@@ -7,7 +7,11 @@ import type {
     SecurityAsset,
 } from './types'
 
-import { ASSET_ENVIRONMENTS, ASSET_TYPES } from './types'
+import {
+    ASSET_ENVIRONMENTS,
+    ASSET_TYPES,
+    DATA_CLASSIFICATIONS,
+} from './types'
 
 export class ApiError extends Error {
     readonly status: number
@@ -138,6 +142,10 @@ function isSecurityAsset(value: unknown): value is SecurityAsset {
         ownerIsValid &&
         ASSET_ENVIRONMENTS.some(
             (environment) => environment === asset.environment,
+        ) &&
+        DATA_CLASSIFICATIONS.some(
+            (classification) =>
+                classification === asset.data_classification,
         ) &&
         asset.record_origin === 'synthetic' &&
         asset.verification_state === 'unverified'

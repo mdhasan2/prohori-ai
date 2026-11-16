@@ -70,12 +70,23 @@ export const ASSET_ENVIRONMENTS = [
 
 export type AssetEnvironment = (typeof ASSET_ENVIRONMENTS)[number]
 
+export const DATA_CLASSIFICATIONS = [
+    'unknown',
+    'public',
+    'internal',
+    'confidential',
+    'restricted',
+] as const
+
+export type DataClassification = (typeof DATA_CLASSIFICATIONS)[number]
+
 export interface SecurityAsset {
     asset_id: string
     name: string
     asset_type: AssetType
     owner_team: string | null
     environment: AssetEnvironment
+    data_classification: DataClassification
     record_origin: 'synthetic'
     verification_state: 'unverified'
 }
