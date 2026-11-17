@@ -1,5 +1,10 @@
 import "@testing-library/jest-dom/vitest"
-import { render, screen, waitFor } from "@testing-library/react"
+import {
+    fireEvent,
+    render,
+    screen,
+    waitFor
+} from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import App from "./App"
 
@@ -13,6 +18,7 @@ beforeEach(() => {
             JSON.stringify({
                 status: 'ok',
                 access_mode: 'local_only',
+                identity_mode: 'unconfigured',
             }),
             {
                 status: 200,
@@ -111,5 +117,84 @@ describe('Security Control Center foundation', () => {
         expect(screen.getByRole('status')).toHaveTextContent(
             'API mode: Unconfirmed.',
         )
+    })
+
+    it.each([undefined, 'authenticated'])(
+        'rejects an unsupported identity mode: %s',
+        async (identityMode) => {
+            fetchMock.mockResolvedValue(
+                new Response(
+                    JSON.stringify({
+                        status: 'ok',
+                        access_mode: 'local_only',
+                        identity_mode: identityMode,
+                    }),
+                    {
+                        status: 200,
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                    },
+                ),
+            )
+
+            render(<App />)
+
+            expect(await screen.findByRole('alert')).toHaveTextContent(
+                'Backend did not confirm the operator identity mode.',
+            )
+
+            expect(
+                screen.getByText('Operator identity: unconfirmed.'),
+            ).toBeInTheDocument()
+        },
+    )
+
+    it('keeps run input while navigating without API mutations', async () => {
+        render(<App />)
+
+        expect(
+            await screen.findByText(
+                'Operator identity: not configured.',
+            ),
+        ).toBeInTheDocument()
+
+        const input = screen.getByRole('textbox', {
+            name: 'Run ID',
+        })
+
+        fireEvent.change(input, {
+            target: { value: 'draft-run-id' },
+        })
+
+        const assets = screen.getByRole('link', {
+            name: 'Asset inventory',
+        })
+        const investigations = screen.getByRole('link', {
+            name: 'Investigations',
+        })
+
+        expect(assets).toHaveAttribute('href', '#inventory-section')
+        expect(investigations).toHaveAttribute(
+            'href',
+            '#investigation-controls',
+        )
+
+        expect(
+            document.getElementById('inventory-section'),
+        ).toBeInTheDocument()
+        expect(
+            document.getElementById('investigation-controls'),
+        ).toBeInTheDocument()
+
+        fireEvent.click(assets)
+        fireEvent.click(investigations)
+
+        expect(input).toHaveValue('draft-run-id')
+        expect(
+            screen.getByRole('button', { name: 'Emergency stop' }),
+        ).toBeVisible()
+
+        expect(fetchMock).toHaveBeenCalledTimes(1)
     })
 })

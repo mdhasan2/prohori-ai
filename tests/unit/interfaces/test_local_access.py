@@ -32,11 +32,13 @@ def test_health_exposes_local_access_contract(client: TestClient) -> None:
     assert response.json() == {
         "status": "ok",
         "access_mode": "local_only",
+        "identity_mode": "unconfigured",
     }
 
     schema = client.get("/openapi.json").json()
     properties = schema["components"]["schemas"]["HealthResponse"]["properties"]
     assert properties["access_mode"]["const"] == "local_only"
+    assert properties["identity_mode"]["const"] == "unconfigured"
 
 
 @pytest.mark.parametrize(

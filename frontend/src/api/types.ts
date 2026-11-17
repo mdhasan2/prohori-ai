@@ -42,6 +42,7 @@ export interface AuditEvent {
 export interface HealthResponse {
     status: 'ok'
     access_mode: 'local_only'
+    identity_mode: 'unconfigured'
 }
 
 export interface StopResponse {
