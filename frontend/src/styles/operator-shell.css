@@ -15,6 +15,7 @@
   min-height: 100dvh;
   background: #edf4f5;
   color: #183235;
+  color-scheme: light;
 }
 
 .operator-rail {
@@ -121,22 +122,40 @@
   transform: translateY(0);
 }
 
-@media (prefers-color-scheme: dark) {
-  .operator-shell {
-    --surface: #2a2a2a;
-    --border: #424242;
-    --code: #303030;
-    --shell-rail: #171717;
-    --shell-muted: #b4b4b4;
-    --shell-control: #565656;
-    --shell-focus: #8bd6bf;
-    --shell-primary: #ececec;
-    --shell-primary-text: #212121;
-    --shell-alert: #ffb1b9;
+.operator-shell[data-theme='dark'] {
+  --surface: #2a2a2a;
+  --border: #424242;
+  --code: #303030;
+  --shell-rail: #171717;
+  --shell-muted: #b4b4b4;
+  --shell-control: #565656;
+  --shell-focus: #8bd6bf;
+  --shell-primary: #ececec;
+  --shell-primary-text: #212121;
+  --shell-alert: #ffb1b9;
 
-    background: #212121;
-    color: #ececec;
-  }
+  background: #212121;
+  color: #ececec;
+  color-scheme: dark;
+}
+
+.operator-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.operator-theme-toggle {
+  min-height: 44px;
+  max-width: 100%;
+  margin: 0;
+}
+
+.operator-preference-note {
+  color: var(--shell-muted);
+  font-size: 0.9rem;
 }
 
 @media (max-width: 680px) {

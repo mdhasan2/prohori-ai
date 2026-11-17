@@ -86,7 +86,23 @@ describe('Security Control Center foundation', () => {
         expect(screen.getByRole('status')).toHaveTextContent(
             'Backend: Unavailable. API mode: Unconfirmed.',
         )
+
+        fireEvent.click(
+            screen.getByRole('button', {
+                name: 'Switch to light theme',
+            }),
+        )
+
+        expect(screen.getByRole('alert')).toHaveTextContent(
+            'Local operator access only.',
+        )
+        expect(screen.getByRole('status')).toHaveTextContent(
+            'Backend: Unavailable. API mode: Unconfirmed.',
+        )
+        expect(fetchMock).toHaveBeenCalledTimes(1)
     })
+
+
 
     it('rejects an older or incomplete health contract', async () => {
         fetchMock.mockResolvedValue(
@@ -194,6 +210,42 @@ describe('Security Control Center foundation', () => {
         expect(
             screen.getByRole('button', { name: 'Emergency stop' }),
         ).toBeVisible()
+
+        expect(fetchMock).toHaveBeenCalledTimes(1)
+    })
+
+    it('saves theme without losing run input or making API requests', async () => {
+        render(<App />)
+
+        expect(
+            await screen.findByText(
+                'Operator identity: not configured.',
+            ),
+        ).toBeInTheDocument()
+
+        const input = screen.getByRole('textbox', {
+            name: 'Run ID',
+        })
+
+        fireEvent.change(input, {
+            target: { value: 'draft-run-id' },
+        })
+
+        fireEvent.click(
+            screen.getByRole('button', {
+                name: 'Switch to light theme',
+            }),
+        )
+
+        expect(localStorage.getItem('prohori:theme')).toBe('light')
+        expect(input).toHaveValue('draft-run-id')
+
+        expect(screen.getByRole('status')).toHaveTextContent(
+            'Backend: Connected. API mode: Local-only.',
+        )
+        expect(
+            screen.getByText('Operator identity: not configured.'),
+        ).toBeInTheDocument()
 
         expect(fetchMock).toHaveBeenCalledTimes(1)
     })
