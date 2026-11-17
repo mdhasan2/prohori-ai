@@ -27,6 +27,7 @@ class StrictModel(BaseModel):
 class HealthResponse(StrictModel):
     status: Literal["ok"] = "ok"
     access_mode: Literal["local_only"] = "local_only"
+    identity_mode: Literal["unconfigured"] = "unconfigured"
 
 
 class PendingApprovalResponse(StrictModel):

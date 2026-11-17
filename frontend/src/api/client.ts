@@ -88,9 +88,19 @@ export async function getHealth(): Promise<HealthResponse> {
         throw new Error('Backend did not confirm local-only access.')
     }
 
+    if (
+        !('identity_mode' in body) ||
+        body.identity_mode !== 'unconfigured'
+    ) {
+        throw new Error(
+            'Backend did not confirm the operator identity mode.',
+        )
+    }
+
     return {
         status: 'ok',
         access_mode: 'local_only',
+        identity_mode: 'unconfigured',
     }
 }
 

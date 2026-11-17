@@ -18,6 +18,7 @@ import ApprovalPanel from './components/ApprovalPanel'
 import InvestigationResult from './components/InvestigationResult'
 import AuditTimeline from './components/AuditTimeline'
 import InventoryPanel from './components/InventoryPanel'
+import OperatorShell from './components/OperatorShell'
 
 const STORAGE_KEY = 'prohori:lastRunId'
 
@@ -45,6 +46,8 @@ export default function App() {
   const [connection, setConnection] = useState('Checking')
   const [accessMode, setAccessMode] = 
   useState<HealthResponse['access_mode'] | null>(null)
+  const [identityMode, setIdentityMode] =
+  useState<HealthResponse['identity_mode'] | null>(null)
   const [healthError, setHealthError] = useState('')
   const [run, setRun] = useState<RunResponse | null>(null)
   const [runId, setRunId] = useState('')
@@ -68,12 +71,14 @@ export default function App() {
         if (active) {
           setConnection('Connected')
           setAccessMode(health.access_mode)
+          setIdentityMode(health.identity_mode)
           setHealthError('')
         }
       } catch (cause) {
         if (active) {
           setConnection('Unavailable')
           setAccessMode(null)
+          setIdentityMode(null)
           setHealthError(message(cause))
         }
       }
@@ -173,21 +178,21 @@ export default function App() {
   const pending = run?.pending_approval
 
   return (
-    <main>
-      <header>
-        <p>Prohori AI</p>
-        <h1>Security Control Center</h1>
-        <p role="status" aria-live="polite">
-          Backend: {connection}. API mode:{' '}
-          {accessMode === 'local_only' ? 'Local-only': 'Unconfirmed'}.
-        </p>
-        <p>Operator identity: not configured.</p>
-        {healthError && <p role="alert">{healthError}</p>}
-      </header>
 
-      <InventoryPanel/>
-
-      <section aria-label="Investigation controls">
+    <OperatorShell
+      connection={connection}
+      accessMode={accessMode}
+      identityMode={identityMode}
+      healthError={healthError}
+    >
+      <div id="inventory-section" tabIndex={-1}>
+        <InventoryPanel/>
+      </div>
+      <section
+        id="investigation-controls"
+        aria-label="Investigation controls"
+        tabIndex={-1}
+      >
         <button
           disabled={busy || stopped || needsRefresh}
           onClick={() => void perform(createRun, true)}
@@ -267,6 +272,6 @@ export default function App() {
           <AuditTimeline events={audit} error={auditError}/>
         </>
       )}
-    </main>
+    </OperatorShell>
   )
 }

@@ -151,6 +151,7 @@ describe('InventoryPanel', ()=> {
                 return jsonResponse({
                     status: 'ok',
                     access_mode: 'local_only',
+                    identity_mode: 'unconfigured',
                 })
             }
 
