@@ -1,6 +1,8 @@
-import type { ReactNode } from "react"
+import { useState, type ReactNode } from "react"
 import type { HealthResponse } from "../api/types"
 import '../styles/operator-shell.css'
+import {readTheme, saveTheme } from '../theme'
+import type { Theme } from '../theme'
 
 interface OperatorShellProps {
     connection: string
@@ -17,8 +19,24 @@ export default function OperatorShell({
     healthError,
     children,
 }: OperatorShellProps) {
+
+    const [theme, setTheme] = useState<Theme>(readTheme)
+    const [preferenceError, setPreferenceError] = useState('')
+    function toggleTheme() {
+        const nextTheme: Theme = theme === 'dark' ? 'light' : 'dark'
+
+        setTheme(nextTheme)
+
+        const saved = saveTheme(nextTheme)
+
+        setPreferenceError(
+            saved
+                ? ''
+                : 'Theme changed for this session. Your browser could not save the preference.',
+        )
+    }
     return (
-        <div className="operator-shell">
+        <div className="operator-shell" data-theme={theme}>
             <a className="operator-skip-link" href="#console-main">
                 Skip to console
             </a>
@@ -73,8 +91,24 @@ export default function OperatorShell({
                 tabIndex={-1}
             >
                 <header className="operator-header">
-                    <p className="operator-eyebrow"> Prohori AI</p>
-                    <h1>Security Control Center</h1>
+                    <div className="operator-title-row">
+                        <div>
+                            <p className="operator-eyebrow">
+                                Prohori AI
+                            </p>
+                            <h1>Security Control Center</h1>
+                        </div>
+
+                        <button
+                            type="button"
+                            className="operator-theme-toggle"
+                            onClick={toggleTheme}
+                        >
+                            {theme === 'dark'
+                                ? 'Switch to light theme'
+                                : 'Switch to dark theme'}
+                        </button>
+                    </div>
 
                     <p role="status" aria-live="polite">
                         Backend: {connection}. API mode: {' '}
@@ -93,8 +127,16 @@ export default function OperatorShell({
                     {healthError && (
                         <p role="alert">{healthError}</p>
                     )}
-                </header>
 
+                    {preferenceError && (
+                        <p
+                            role="status"
+                            className="operator-preference-note"
+                        >
+                            {preferenceError}
+                        </p>
+                    )}
+                </header>
                 {children}
             </main>
         </div>
