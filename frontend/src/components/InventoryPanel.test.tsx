@@ -13,6 +13,7 @@ const asset: SecurityAsset = {
     owner_team: null,
     environment: 'lab',
     data_classification: 'unknown',
+    discovery_source: 'demo_fixture',
 }
 
 const fetchMock = vi.fn<typeof fetch>()
@@ -73,6 +74,12 @@ describe('InventoryPanel', ()=> {
         expect(
             screen.getByText(
                 'Data classification: Unknown (not recorded)',
+            ),
+        ).toBeInTheDocument()
+
+        expect(
+            screen.getByText(
+                'Discovery source: Built-in demo fixture',
             ),
         ).toBeInTheDocument()
 
@@ -248,6 +255,11 @@ describe('InventoryPanel', ()=> {
         { data_classification: null },
         { data_classification: 42 },
         { data_classification: undefined },
+        { discovery_source: '' },
+        { discovery_source: 'network_scan' },
+        { discovery_source: null },
+        { discovery_source: 42 },
+        { discovery_source: undefined },
     ])('rejects invalid metadata: %j', async (overrides) => {
         fetchMock.mockResolvedValue(
             jsonResponse([{ ...asset, ...overrides }]),
@@ -296,4 +308,28 @@ describe('InventoryPanel', ()=> {
             ).toBeInTheDocument()
         },
     )
+
+    it('displays an unknown discovery source explicitly', async () =>{
+        fetchMock.mockResolvedValue(
+            jsonResponse([{ ...asset, discovery_source: 'unknown' }]),
+        )
+
+        render(<InventoryPanel />)
+        loadInventory()
+
+        expect(
+            await screen.findByText(
+                'Discovery source: Unknown (not recorded)',
+            ),
+        ).toBeInTheDocument()
+
+        expect(
+            screen.getByText('Synthetic demo record'),
+        ).toBeInTheDocument()
+
+        expect(
+            screen.getByText('Verification: unverified'),
+        ).toBeInTheDocument()
+
+    })
 })

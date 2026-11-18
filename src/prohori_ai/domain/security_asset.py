@@ -34,6 +34,11 @@ class DataClassification(StrEnum):
     RESTRICTED = "restricted"
 
 
+class DiscoverySource(StrEnum):
+    UNKNOWN = "unknown"
+    DEMO_FIXTURE = "demo_fixture"
+
+
 class SecurityAsset(DomainModel):
     """An inventory record, not an execution authorization."""
 
@@ -51,6 +56,7 @@ class SecurityAsset(DomainModel):
     )
     environment: AssetEnvironment = AssetEnvironment.UNKNOWN
     data_classification: DataClassification = DataClassification.UNKNOWN
+    discovery_source: DiscoverySource = DiscoverySource.UNKNOWN
 
     # This first implementaion accepts synthetic, unverified records only.
     record_origin: Literal["synthetic"] = "synthetic"

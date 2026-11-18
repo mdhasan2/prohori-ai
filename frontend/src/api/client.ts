@@ -11,6 +11,7 @@ import {
     ASSET_ENVIRONMENTS,
     ASSET_TYPES,
     DATA_CLASSIFICATIONS,
+    DISCOVERY_SOURCES,
 } from './types'
 
 export class ApiError extends Error {
@@ -156,6 +157,9 @@ function isSecurityAsset(value: unknown): value is SecurityAsset {
         DATA_CLASSIFICATIONS.some(
             (classification) =>
                 classification === asset.data_classification,
+        ) &&
+        DISCOVERY_SOURCES.some(
+            (source) => source === asset.discovery_source,
         ) &&
         asset.record_origin === 'synthetic' &&
         asset.verification_state === 'unverified'

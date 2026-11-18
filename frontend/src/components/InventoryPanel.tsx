@@ -3,6 +3,7 @@ import { getSecurityAssets } from "../api/client"
 import type {
     AssetEnvironment,
     DataClassification,
+    DiscoverySource,
     SecurityAsset,
 } from '../api/types'
 
@@ -20,6 +21,11 @@ const CLASSIFICATION_LABELS: Record<DataClassification, string> = {
     internal: 'Internal',
     confidential: 'Confidential',
     restricted: 'Restricted',
+}
+
+const DISCOVERY_SOURCE_LABELS: Record<DiscoverySource, string> = {
+    unknown: 'Unknown (not recorded)',
+    demo_fixture: 'Built-in demo fixture',
 }
 
 type InventoryState =
@@ -107,6 +113,12 @@ export default function InventoryPanel() {
                                         Data classification: {' '}
                                         {CLASSIFICATION_LABELS[
                                             asset.data_classification
+                                        ]}
+                                    </p>
+                                    <p>
+                                        Discovery source: {' '}
+                                        {DISCOVERY_SOURCE_LABELS[
+                                            asset.discovery_source
                                         ]}
                                     </p>
                                     <p>

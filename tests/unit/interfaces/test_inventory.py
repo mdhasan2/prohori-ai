@@ -20,6 +20,7 @@ ASSET_PAYLOAD: dict[str, object] = {
     "owner_team": None,
     "environment": "lab",
     "data_classification": "unknown",
+    "discovery_source": "demo_fixture",
 }
 
 
@@ -78,6 +79,10 @@ def test_inventory_contract_and_no_execution(
         {"data_classification": "secret"},
         {"data_classification": None},
         {"data_classification": 42},
+        {"discovery_source": ""},
+        {"discovery_source": "network_scan"},
+        {"discovery_source": None},
+        {"discovery_source": 42},
     ],
 )
 def test_invalid_asset_contract_is_rejected(
@@ -138,6 +143,12 @@ def test_inventory_is_documented_in_openapi(client: TestClient) -> None:
         "restricted",
     ]
 
+    assert properties["discovery_source"]["default"] == "unknown"
+    assert schema["components"]["schemas"]["DiscoverySource"]["enum"] == [
+        "unknown",
+        "demo_fixture",
+    ]
+
 
 def test_missing_metadata_stays_unknown() -> None:
     asset = SecurityAsset.model_validate(
@@ -152,6 +163,8 @@ def test_missing_metadata_stays_unknown() -> None:
     assert serialized["environment"] == "unknown"
     assert asset.data_classification.value == "unknown"
     assert serialized["data_classification"] == "unknown"
+    assert asset.discovery_source.value == "unknown"
+    assert serialized["discovery_source"] == "unknown"
 
 
 def test_known_metadata_does_not_change_verification() -> None:
@@ -182,5 +195,19 @@ def test_classificaiton_does_not_grant_verification(classification: str) -> None
     )
 
     assert asset.model_dump(mode="json")["data_classification"] == classification
+    assert asset.record_origin == "synthetic"
+    assert asset.verification_state == "unverified"
+
+
+@pytest.mark.parametrize("source", ["unknown", "demo_fixture"])
+def test_discovery_source_does_not_grant_verification(source: str) -> None:
+    asset = SecurityAsset.model_validate(
+        {
+            **ASSET_PAYLOAD,
+            "discovery_source": source,
+        }
+    )
+
+    assert asset.model_dump(mode="json")["discovery_source"] == source
     assert asset.record_origin == "synthetic"
     assert asset.verification_state == "unverified"

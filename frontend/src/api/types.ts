@@ -1,4 +1,3 @@
-
 export type ApprovalGate = 'investigation' | 'validation'
 
 export interface PendingApproval {
@@ -81,6 +80,13 @@ export const DATA_CLASSIFICATIONS = [
 
 export type DataClassification = (typeof DATA_CLASSIFICATIONS)[number]
 
+export const DISCOVERY_SOURCES = [
+    'unknown',
+    'demo_fixture',
+] as const
+
+export type DiscoverySource = (typeof DISCOVERY_SOURCES)[number]
+
 export interface SecurityAsset {
     asset_id: string
     name: string
@@ -88,6 +94,7 @@ export interface SecurityAsset {
     owner_team: string | null
     environment: AssetEnvironment
     data_classification: DataClassification
+    discovery_source: DiscoverySource
     record_origin: 'synthetic'
     verification_state: 'unverified'
 }
