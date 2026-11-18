@@ -248,7 +248,12 @@ export default function App() {
             <p>Run: {run.run_id}</p>
             <p>Status: {run.status}</p>
             <p>Target: http://127.0.0.1:18080/</p>
-            <p>Check: Content-Security-Policy response header </p>
+            <p>
+              Check:{' '}
+              {run.state.hypothesis?.kind === 'path_traversal'
+                ? 'Path traversal'
+                : 'Not identified in this run'}
+            </p>
             {run.status === 'interrupted' && (
               <p>
                 Execution was interrupted outside and approval gate.
