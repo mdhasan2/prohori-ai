@@ -330,6 +330,92 @@ describe('InventoryPanel', ()=> {
         expect(
             screen.getByText('Verification: unverified'),
         ).toBeInTheDocument()
+    })
 
+    it('displays five demo asset categories using one read request', async () => {
+        const demoAssets: SecurityAsset[] = [
+            asset,
+            {
+                ...asset,
+                asset_id: 'demo-web-server',
+                name: 'Demo web sever',
+                asset_type: 'server',
+                owner_team: 'Demo Infrastructure Team',
+            },
+            {
+                ...asset,
+                asset_id: 'demo-php-app',
+                name: 'Demo PHP application',
+                asset_type: 'application',
+                owner_team: 'Demo Application Team',
+            },
+            {
+                ...asset,
+                asset_id: 'demo-container',
+                name: 'Demo container',
+                asset_type: 'container',
+                owner_team: 'Demo Infrastructure Team',
+            },
+            {
+                ...asset,
+                asset_id: 'demo-ai-agent',
+                name: 'Demo AI agent',
+                asset_type: 'ai_agent',
+                owner_team: 'Demo AI Team',
+            },
+        ]
+
+        fetchMock.mockResolvedValueOnce(jsonResponse(demoAssets))
+
+        render(<InventoryPanel />)
+        loadInventory()
+
+        expect(
+            await screen.findByText('Records loaded: 5.'),
+        ).toBeInTheDocument()
+
+        expect(screen.getAllByRole('listitem')).toHaveLength(5)
+
+        for (const record of demoAssets) {
+            expect(
+                screen.getByRole('heading', {name: record.name }),
+            ).toBeInTheDocument()
+        }
+
+        for (const label of [
+            'API',
+            'Server',
+            'Application',
+            'Container',
+            'AI agent'
+        ]) {
+            expect(
+                screen.getByText(`Type: ${label}`),
+            ).toBeInTheDocument()
+        }
+
+        expect(
+            screen.getAllByText('Synthetic demo record'),
+        ).toHaveLength(5)
+
+        expect(
+            screen.getAllByText('Verification: unverified')
+        )
+
+        expect(
+            screen.getAllByText('Discovery source: Built-in demo fixture'),
+        ).toHaveLength(5)
+
+        expect(fetchMock).toHaveBeenCalledTimes(1)
+        expect(fetchMock).toHaveBeenCalledWith(
+            '/api/assets',
+            expect.objectContaining({
+                headers: { Accept: 'application/json' },
+            }),
+        )
+
+        for (const [, options] of fetchMock.mock.calls) {
+            expect(options?.method ?? 'GET').toBe('GET')
+        }
     })
 })

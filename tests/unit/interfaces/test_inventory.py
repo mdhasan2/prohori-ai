@@ -53,7 +53,54 @@ def test_inventory_contract_and_no_execution(
         response = client.get("/api/assets")
 
         assert response.status_code == 200
-        assert response.json() == [ASSET_PAYLOAD]
+        assets = response.json()
+        by_id = {item["asset_id"]: item for item in assets}
+
+        # Check both the record count and uniqueness of fixture IDs.
+        assert len(assets) == len(by_id) == 5
+        assert by_id["lab-api"] == ASSET_PAYLOAD
+
+        assert {
+            item["asset_id"]: (
+                item["name"],
+                item["asset_type"],
+                item["owner_team"],
+            )
+            for item in assets
+        } == {
+            "lab-api": (
+                "Path-traversal lab API",
+                "api",
+                None,
+            ),
+            "demo-web-server": (
+                "Demo web server",
+                "server",
+                "Demo Infrastructure Team",
+            ),
+            "demo-php-app": (
+                "Demo PHP application",
+                "application",
+                "Demo Application Team",
+            ),
+            "demo-container": (
+                "Demo container",
+                "container",
+                "Demo Infrastructure Team",
+            ),
+            "demo-ai-agent": (
+                "Demo AI agent",
+                "ai_agent",
+                "Demo AI Team",
+            ),
+        }
+
+        for item in assets:
+            assert item["environment"] == "lab"
+            assert item["data_classification"] == "unknown"
+            assert item["discovery_source"] == "demo_fixture"
+            assert item["record_origin"] == "synthetic"
+            assert item["verification_state"] == "unverified"
 
         execute.assert_not_called()
         create_app.assert_not_called()
