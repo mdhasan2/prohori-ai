@@ -1,26 +1,11 @@
-"""Read-only inventory service for the first console doemonstration."""
+"""Return explicit demo fixtures without contacting any target."""
 
-from prohori_ai.domain.security_asset import (
-    AssetEnvironment,
-    AssetType,
-    DataClassification,
-    DiscoverySource,
-    SecurityAsset,
-)
+from prohori_ai.application.demo_inventory import demo_assets
+from prohori_ai.domain.security_asset import SecurityAsset
 
 
 class InventoryService:
     """Return the explicit demo fixture without contacting any target."""
 
     def list_assets(self) -> tuple[SecurityAsset, ...]:
-        return (
-            SecurityAsset(
-                asset_id="lab-api",
-                name="Path-traversal lab API",
-                asset_type=AssetType.API,
-                owner_team=None,
-                environment=AssetEnvironment.LAB,
-                data_classification=DataClassification.UNKNOWN,
-                discovery_source=DiscoverySource.DEMO_FIXTURE,
-            ),
-        )
+        return demo_assets()

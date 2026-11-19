@@ -2,10 +2,21 @@ import { useState } from "react"
 import { getSecurityAssets } from "../api/client"
 import type {
     AssetEnvironment,
+    AssetType,
     DataClassification,
     DiscoverySource,
     SecurityAsset,
 } from '../api/types'
+
+const ASSET_TYPE_LABLES: Record<AssetType, string> = {
+    server: 'Server',
+    application: 'Application',
+    api: 'API',
+    container: 'Container',
+    kubernetes_workload: 'Kubernetes workload',
+    cloud_resource: 'Cloud resource',
+    ai_agent: 'AI agent'
+}
 
 const ENVIRONMENT_LABELS: Record<AssetEnvironment, string> = {
     unknown: 'Unknown',
@@ -100,7 +111,7 @@ export default function InventoryPanel() {
                                     <p>
                                         Asset ID: <code>{asset.asset_id}</code>
                                     </p>
-                                    <p>Type: {asset.asset_type}</p>
+                                    <p>Type: {ASSET_TYPE_LABLES[asset.asset_type]}</p>
                                     <p>
                                         Owner team: {' '}
                                         {asset.owner_team ?? 'Unknown (not recorded)'}
